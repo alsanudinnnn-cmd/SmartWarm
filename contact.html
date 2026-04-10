@@ -15,6 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="nav.js" defer></script>
   <style>
     .contact-hero {
       text-align: center;
@@ -142,7 +143,7 @@
 </head>
 <body class="page-generic">
   <div class="site-shell">
-    <header class="site-header">
+    <header class="site-header" data-site-header>
       <a class="brand" href="index.html">
         <span class="brand-mark">SW</span>
         <span class="brand-copy">
@@ -150,7 +151,20 @@
           <span>Interactive LED Challenge</span>
         </span>
       </a>
-      <nav class="site-nav">
+      <button
+        class="nav-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="contactNav"
+        aria-label="Toggle navigation"
+        data-nav-toggle
+      >
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+      </button>
+
+      <nav class="site-nav" id="contactNav" data-nav-menu>
         <a href="index.html">Home</a>
         <a href="mouse-sim.html">Play Demo</a>
         <a href="result.html">Leaderboard</a>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,17 +9,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  >
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="nav.js" defer></script>
 </head>
+
 <body class="page-results">
   <div class="site-shell">
-    <header class="site-header">
+    <header class="site-header" data-site-header>
       <a class="brand" href="index.html">
         <span class="brand-mark">SW</span>
         <span class="brand-copy">
@@ -27,15 +29,24 @@
         </span>
       </a>
 
-      <nav class="site-nav">
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="resultsNav"
+        aria-label="Toggle navigation" data-nav-toggle>
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+      </button>
+
+      <nav class="site-nav" id="resultsNav" data-nav-menu>
         <a href="index.html">Home</a>
-        <a href="index.html#register">Register Player</a>
+        <a href="mouse-sim.html">Mouse Demo</a>
         <a href="#resultsTable">Leaderboard</a>
         <a href="contact.html">Order Console</a>
         <a href="admin.html" class="nav-circle-btn" title="Admin Panel">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/>
-            <circle cx="12" cy="12" r="3"/>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path
+              d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+            <circle cx="12" cy="12" r="3" />
           </svg>
         </a>
       </nav>
@@ -79,7 +90,7 @@
             </thead>
             <tbody id="resultTable">
               <tr>
-                <td colspan="5" class="empty-state">Waiting for results...</td>
+                <td colspan="8" class="empty-state">Waiting for results...</td>
               </tr>
             </tbody>
           </table>
@@ -118,18 +129,14 @@
             const avgReactionTime = item.avgReactionTime ?? 0;
             const stage = item.stage ?? 1;
             const bestStreak = item.bestStreak ?? 0;
-            
-            // Build power pills
-            let pills = [];
-            if (item.timeCutSeconds > 0)    pills.push('<span class="power-pill pill-time">-5S</span>');
-            if (item.usedDoublePoints)      pills.push('<span class="power-pill pill-x2">x2</span>');
-            if (item.usedOnePointFivePoints)pills.push('<span class="power-pill pill-x1_5">x1.5</span>');
-            if (item.usedShield)            pills.push('<span class="power-pill pill-shield">SHIELD</span>');
-            if (item.usedSpeedBoost)        pills.push('<span class="power-pill pill-speed">BOOST</span>');
-            
-            if (pills.length === 0) {
-              pills.push('<span class="power-pill pill-none">PURE RUN</span>');
-            }
+
+            const pills = [];
+            if (item.timeCutSeconds > 0) pills.push('<span class="power-pill pill-time">-5S</span>');
+            if (item.usedDoublePoints) pills.push('<span class="power-pill pill-x2">x2</span>');
+            if (item.usedOnePointFivePoints) pills.push('<span class="power-pill pill-x1_5">x1.5</span>');
+            if (item.usedShield) pills.push('<span class="power-pill pill-shield">SHIELD</span>');
+            if (item.usedSpeedBoost) pills.push('<span class="power-pill pill-speed">BOOST</span>');
+            if (pills.length === 0) pills.push('<span class="power-pill pill-none">PURE RUN</span>');
 
             const imageMarkup = playerImage
               ? `<img src="${playerImage}" alt="${playerName}">`
@@ -166,4 +173,5 @@
       });
   </script>
 </body>
+
 </html>

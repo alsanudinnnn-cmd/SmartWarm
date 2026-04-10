@@ -16,6 +16,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="nav.js" defer></script>
   <style>
     /* ── Admin-specific styles ── */
     .admin-hero {
@@ -495,7 +496,7 @@
     .admin-panel-section {
       display: none;
     }
-    
+
     .admin-panel-section.is-active {
       display: block;
     }
@@ -554,7 +555,8 @@
       text-align: center;
       background: linear-gradient(180deg, #fff, #ebd4ff);
       -webkit-background-clip: text;
-      background-clip: text; /* standard property */
+      background-clip: text;
+      /* standard property */
       -webkit-text-fill-color: transparent;
     }
 
@@ -627,19 +629,20 @@
     .auth-link button:hover {
       text-decoration: underline;
     }
-    
+
     .nav-logout {
       display: none;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       padding: 6px 14px;
       border-radius: 999px;
       color: var(--text);
       font-size: 0.85rem;
       cursor: pointer;
     }
+
     .nav-logout:hover {
-      background: rgba(255,255,255,0.15);
+      background: rgba(255, 255, 255, 0.15);
     }
 
     @media (max-width: 768px) {
@@ -672,7 +675,7 @@
 
 <body class="page-admin">
   <div class="site-shell">
-    <header class="site-header">
+    <header class="site-header" data-site-header>
       <a class="brand" href="index.html">
         <span class="brand-mark">SW</span>
         <span class="brand-copy">
@@ -680,9 +683,16 @@
           <span>Interactive LED Challenge</span>
         </span>
       </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="adminNav"
+        aria-label="Toggle navigation" data-nav-toggle>
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+      </button>
 
-      <nav class="site-nav">
+      <nav class="site-nav" id="adminNav" data-nav-menu>
         <a href="index.html">Home</a>
+        <a href="mouse-sim.html">Mouse Demo</a>
         <a href="result.html">Leaderboard</a>
         <a href="contact.html">Order Console</a>
         <button id="logoutBtn" class="nav-logout" onclick="logoutAdmin()">Log Out</button>
@@ -693,7 +703,7 @@
     <div id="authGate">
       <div class="flip-container">
         <div class="flipper" id="flipperCard">
-          
+
           <!-- Front Face: Login -->
           <div class="flip-face front">
             <h2 class="auth-title">Admin Login</h2>
@@ -711,8 +721,10 @@
           <div class="flip-face back">
             <h2 class="auth-title">Register</h2>
             <form class="auth-form" id="registerForm">
-              <input type="text" id="regUser" placeholder="Choose a Username" required pattern="[A-Za-z0-9]+" title="Letters and numbers only">
+              <input type="text" id="regUser" placeholder="Choose a Username" required pattern="[A-Za-z0-9]+"
+                title="Letters and numbers only">
               <input type="password" id="regPass" placeholder="Choose a Password" required>
+              <input type="password" id="regPassConfirm" placeholder="Confirm Password" required>
               <button type="submit" class="auth-btn auth-btn-primary">Register</button>
             </form>
             <div class="auth-link">
@@ -758,13 +770,8 @@
         </div>
 
         <div class="admin-toolbar">
-          <input
-            type="text"
-            class="admin-search"
-            id="searchInput"
-            placeholder="Search player by name..."
-            autocomplete="off"
-          >
+          <input type="text" class="admin-search" id="searchInput" placeholder="Search player by name..."
+            autocomplete="off">
           <button class="button button-danger button-sm" id="deleteSelectedBtn" disabled onclick="deleteSelected()">
             Delete selected
           </button>
@@ -826,11 +833,12 @@
                 <th>Email</th>
                 <th>Phone Number</th>
                 <th>Contact</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="ordersTableBody">
               <tr>
-                <td colspan="5">
+                <td colspan="6">
                   <div class="empty-state-admin">
                     <p>Loading orders...</p>
                   </div>
@@ -855,7 +863,8 @@
         </svg>
       </div>
       <h3 id="modalTitle">Delete result?</h3>
-      <p id="modalText">This action cannot be undone. The player result will be permanently removed from the database.</p>
+      <p id="modalText">This action cannot be undone. The player result will be permanently removed from the database.
+      </p>
       <div class="modal-actions">
         <button class="button button-secondary button-sm" onclick="closeModal()">Cancel</button>
         <button class="button button-danger button-sm" id="confirmDeleteBtn" onclick="executePendingDelete()">
@@ -909,7 +918,13 @@
       e.preventDefault();
       const user = document.getElementById('regUser').value.trim();
       const pass = document.getElementById('regPass').value;
-      
+      const confirmPass = document.getElementById('regPassConfirm').value;
+
+      if (pass !== confirmPass) {
+        alert("Passwords do not match.");
+        return;
+      }
+
       const btn = e.target.querySelector('button');
       btn.textContent = 'Registering...';
 
@@ -932,7 +947,7 @@
       e.preventDefault();
       const user = document.getElementById('loginUser').value.trim();
       const pass = document.getElementById('loginPass').value;
-      
+
       const btn = e.target.querySelector('button');
       btn.textContent = 'Checking...';
 
@@ -975,7 +990,7 @@
       adminApp.style.display = 'none';
       logoutBtn.style.display = 'none';
       authGate.style.display = 'flex';
-      
+
       // Clear data for security
       document.getElementById("adminTableBody").innerHTML = "";
       document.getElementById("ordersTableBody").innerHTML = "";
@@ -986,7 +1001,7 @@
     function switchTab(tabId) {
       document.getElementById('tabLeaderboard').classList.toggle('is-active', tabId === 'leaderboard');
       document.getElementById('tabOrders').classList.toggle('is-active', tabId === 'orders');
-      
+
       document.getElementById('panelLeaderboard').classList.toggle('is-active', tabId === 'leaderboard');
       document.getElementById('panelOrders').classList.toggle('is-active', tabId === 'orders');
     }
@@ -1023,7 +1038,7 @@
             </div>
           </td></tr>`;
       });
-      
+
       db.ref("orders").on("value", (snapshot) => {
         const data = snapshot.val();
         if (!data) {
@@ -1061,9 +1076,9 @@
       const query = searchInput.value.trim().toLowerCase();
       const filtered = query
         ? allResults.filter(r => {
-            const name = (r.playerName ?? r.name ?? "").toLowerCase();
-            return name.includes(query);
-          })
+          const name = (r.playerName ?? r.name ?? "").toLowerCase();
+          return name.includes(query);
+        })
         : allResults;
 
       if (filtered.length === 0) {
@@ -1092,14 +1107,14 @@
           const stage = item.stage ?? 1;
           const bestStreak = item.bestStreak ?? 0;
           const isChecked = selectedKeys.has(item.key);
-          
+
           let pills = [];
-          if (item.timeCutSeconds > 0)    pills.push('<span class="power-pill pill-time">-5S</span>');
-          if (item.usedDoublePoints)      pills.push('<span class="power-pill pill-x2">x2</span>');
-          if (item.usedOnePointFivePoints)pills.push('<span class="power-pill pill-x1_5">x1.5</span>');
-          if (item.usedShield)            pills.push('<span class="power-pill pill-shield">SHIELD</span>');
-          if (item.usedSpeedBoost)        pills.push('<span class="power-pill pill-speed">BOOST</span>');
-          if (pills.length === 0)         pills.push('<span class="power-pill pill-none">PURE RUN</span>');
+          if (item.timeCutSeconds > 0) pills.push('<span class="power-pill pill-time">-5S</span>');
+          if (item.usedDoublePoints) pills.push('<span class="power-pill pill-x2">x2</span>');
+          if (item.usedOnePointFivePoints) pills.push('<span class="power-pill pill-x1_5">x1.5</span>');
+          if (item.usedShield) pills.push('<span class="power-pill pill-shield">SHIELD</span>');
+          if (item.usedSpeedBoost) pills.push('<span class="power-pill pill-speed">BOOST</span>');
+          if (pills.length === 0) pills.push('<span class="power-pill pill-none">PURE RUN</span>');
 
           const imageMarkup = playerImage
             ? `<img src="${playerImage}" alt="${playerName}">`
@@ -1146,10 +1161,10 @@
     /* ── Render Orders Table ── */
     function renderOrdersTable() {
       const tbody = document.getElementById('ordersTableBody');
-      
+
       if (allOrders.length === 0) {
         tbody.innerHTML = `
-          <tr><td colspan="5">
+          <tr><td colspan="6">
             <div class="empty-state-admin">
               <p>No orders yet</p>
               <span>When a user submits the form on the promo page, they will appear here.</span>
@@ -1159,20 +1174,20 @@
       }
 
       tbody.innerHTML = allOrders.map(order => {
-        const dateStr = order.timestamp 
-          ? new Date(order.timestamp).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) 
+        const dateStr = order.timestamp
+          ? new Date(order.timestamp).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
           : "Unknown Date";
-          
+
         const name = order.name || "Unknown";
         const email = order.email || "No Email";
         const phone = order.phone || "No Phone";
-        
+
         // Clean phone number for WhatsApp: strip all non-numeric chars except leading '+'
         let cleanedPhone = phone.replace(/[^\d+]/g, '');
         if (cleanedPhone.startsWith('00')) {
           cleanedPhone = '+' + cleanedPhone.substring(2);
         }
-        
+
         // Ensure +60 standard
         if (cleanedPhone.startsWith('0')) {
           cleanedPhone = '+60' + cleanedPhone.substring(1);
@@ -1181,7 +1196,7 @@
         } else if (!cleanedPhone.startsWith('+')) {
           cleanedPhone = '+60' + cleanedPhone;
         }
-        
+
         const waLink = `https://api.whatsapp.com/send?phone=${encodeURIComponent(cleanedPhone)}`;
 
         return `
@@ -1200,6 +1215,14 @@
                 <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
                 Contact
               </a>
+            </td>
+            <td class="admin-actions-cell">
+              <button class="delete-btn" title="Delete order for ${name}" onclick="confirmDeleteOrder('${order.key}', '${name.replace(/'/g, "\\'")}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                </svg>
+              </button>
             </td>
           </tr>
         `;
@@ -1269,6 +1292,14 @@
       openModal();
     }
 
+    function confirmDeleteOrder(key, name) {
+      document.getElementById("modalTitle").textContent = `Delete ${name}'s order?`;
+      document.getElementById("modalText").textContent =
+        `This will permanently remove ${name}'s order inquiry from the database. This cannot be undone.`;
+      pendingDeleteAction = () => deleteOrder(key);
+      openModal();
+    }
+
     async function deleteKeys(keys) {
       closeModal();
       try {
@@ -1291,6 +1322,17 @@
         showToast("All results have been deleted.", "success");
       } catch (err) {
         console.error("Delete all failed:", err);
+        showToast("Delete failed: " + err.message, "error");
+      }
+    }
+
+    async function deleteOrder(key) {
+      closeModal();
+      try {
+        await db.ref(`orders/${key}`).remove();
+        showToast("Order deleted successfully.", "success");
+      } catch (err) {
+        console.error("Delete order failed:", err);
         showToast("Delete failed: " + err.message, "error");
       }
     }

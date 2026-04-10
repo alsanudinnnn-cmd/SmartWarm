@@ -423,6 +423,50 @@ button {
   color: #fff;
 }
 
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.nav-toggle:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.nav-toggle-line {
+  width: 20px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.nav-toggle-line + .nav-toggle-line {
+  margin-top: 4px;
+}
+
+.site-header.is-nav-open .nav-toggle-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.site-header.is-nav-open .nav-toggle-line:nth-child(2) {
+  opacity: 0;
+}
+
+.site-header.is-nav-open .nav-toggle-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
 .nav-circle-btn {
   display: inline-flex;
   align-items: center;
@@ -793,10 +837,12 @@ button {
 .panel {
   padding: 32px;
   border-radius: var(--radius-xl);
+  min-width: 0;
 }
 
 .panel-heading {
   margin-bottom: 24px;
+  min-width: 0;
 }
 
 .panel-heading h2 {
@@ -869,6 +915,7 @@ button {
 
 .input-group input {
   width: 100%;
+  max-width: 100%;
   padding: 16px 18px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 18px;
@@ -1131,9 +1178,10 @@ tbody td {
   position: absolute;
   left: 20px;
   bottom: 18px;
-  z-index: 2;
+  z-index: 8;
   display: grid;
   gap: 4px;
+  max-width: min(280px, calc(100% - 40px));
   padding: 12px 14px;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -2157,14 +2205,70 @@ body.page-led.on-fire .ambient-particle {
   }
 
   .site-header {
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
     border-radius: 28px;
+    padding: 16px 18px;
+  }
+
+  .brand {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .brand-copy {
+    min-width: 0;
+  }
+
+  .brand-copy span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    flex-shrink: 0;
   }
 
   .site-nav {
-    flex-wrap: wrap;
-    gap: 12px;
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding-top: 14px;
+  }
+
+  .site-header.is-nav-open .site-nav {
+    display: flex;
+  }
+
+  .site-nav a,
+  .site-nav button {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+  }
+
+  .site-nav .nav-circle-btn {
+    width: 100%;
+    height: auto;
+    justify-content: flex-start;
+    border-radius: 18px;
+    transform: none;
+  }
+
+  .site-nav .nav-circle-btn svg {
+    margin-right: 12px;
+  }
+
+  .site-nav .nav-circle-btn::after {
+    content: "Admin Panel";
   }
 
   .hero-copy,
@@ -2174,10 +2278,28 @@ body.page-led.on-fire .ambient-particle {
     padding: 24px;
   }
 
+  .panel-form,
+  .panel-leaderboard {
+    min-width: 0;
+  }
+
+  .feature-strip article {
+    padding: 22px;
+  }
+
   .hero h1,
   .results-hero h1 {
     max-width: none;
     font-size: clamp(2.35rem, 11vw, 4rem);
+  }
+
+  .results-meta {
+    gap: 10px;
+  }
+
+  .results-meta span {
+    width: 100%;
+    text-align: center;
   }
 
   .indicator-head {
@@ -2197,6 +2319,7 @@ body.page-led.on-fire .ambient-particle {
     left: 16px;
     right: 16px;
     bottom: 16px;
+    max-width: none;
   }
 
   .streak-popup {
@@ -2227,6 +2350,51 @@ body.page-led.on-fire .ambient-particle {
 
   .button {
     width: 100%;
+  }
+
+  .page-home .panel {
+    padding: 22px 18px;
+  }
+
+  .page-home .panel-heading {
+    margin-bottom: 18px;
+  }
+
+  .page-home .panel-heading h2 {
+    font-size: clamp(1.95rem, 8.8vw, 2.5rem);
+    line-height: 1.02;
+    overflow-wrap: anywhere;
+  }
+
+  .page-home .panel-heading p,
+  .page-home .hero-text {
+    font-size: 0.98rem;
+    line-height: 1.58;
+    overflow-wrap: anywhere;
+  }
+
+  .page-home .input-group input {
+    padding: 15px 16px;
+    border-radius: 16px;
+  }
+
+  .page-home .camera-layout {
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .page-home .camera-card,
+  .page-home .preview-card {
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .page-home .table-wrap table {
+    min-width: 620px;
+  }
+
+  .page-results .table-wrap table {
+    min-width: 920px;
   }
 }
 

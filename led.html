@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -61,19 +61,30 @@
     }
 
     /* ── Stage progress bar ── */
-    .stage-progress-wrap { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .stage-progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 10px 24px rgba(10, 2, 20, 0.22);
+    }
     .stage-progress-bar {
-      flex: 1; height: 6px; border-radius: 999px;
+      flex: 1; height: 14px; border-radius: 999px;
       background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
       overflow: hidden; position: relative;
+      box-shadow: inset 0 0 18px rgba(5, 1, 14, 0.28);
     }
     .stage-progress-bar::after {
       content: ""; position: absolute; inset: 0;
       width: var(--progress, 0%); border-radius: 999px;
-      background: linear-gradient(90deg, #ffb84d, #ff5fe1);
+      background: linear-gradient(90deg, #ffd66b 0%, #ffb84d 38%, #ff7f50 72%, #ff5fe1 100%);
       transition: width 300ms cubic-bezier(.2,.86,.24,1);
-      box-shadow: 0 0 12px rgba(255,184,77,0.38);
+      box-shadow: 0 0 18px rgba(255,184,77,0.46);
     }
     .stage-progress-bar.stage-flash::after {
       animation: progress-flash 700ms ease-out;
@@ -82,7 +93,23 @@
       0%   { background: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.8); }
       100% { background: linear-gradient(90deg,#ffb84d,#ff5fe1); }
     }
-    .stage-progress-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+    .stage-progress-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 212, 122, 0.18), rgba(255, 95, 225, 0.12));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 18px rgba(255, 184, 77, 0.18);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(0.92rem, 1.8vw, 1.12rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #fff2c9;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
 
     /* ── Streak milestone badge ── */
     .streak-milestone {
@@ -129,6 +156,36 @@
       color: #1e0a4e; box-shadow: 0 24px 54px rgba(167,139,250,.32);
     }
     .super-power-overlay.sp-speed .super-power-card p { color: rgba(30,10,78,.78); }
+    @media (max-width: 760px) {
+      .player-profile-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 16px !important;
+      }
+
+      .player-profile-info,
+      .player-profile-header .results-meta {
+        width: 100%;
+      }
+
+      .player-profile-header .results-meta {
+        text-align: left !important;
+      }
+
+      .player-profile-header h1 {
+        font-size: 1.45rem !important;
+      }
+
+      .stage-progress-wrap {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .stage-progress-label {
+        width: 100%;
+      }
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -376,6 +433,7 @@
     let latestSuperPowerTitle = "";
     let latestSuperPowerDetail = "";
     let latestSuperPowerState = "none";
+    let latestSuperPowerReady = false;
     let superPowerTimeout;
     let roundTimerInterval;
     let roundStartedAt = 0;
@@ -510,8 +568,10 @@
     function updateSuperPowerReadyCard(detail, state, ready) {
       const hasReadyPower = Boolean(ready) && state !== "activated";
       superPowerReady = hasReadyPower;
+      latestSuperPowerReady = Boolean(ready);
       superPowerReadyCard.classList.toggle("is-visible", hasReadyPower);
       superPowerReadyCard.classList.toggle("is-activated", state === "activated");
+      superPowerReadyCard.setAttribute("aria-hidden", hasReadyPower ? "false" : "true");
       superPowerStartButton.classList.toggle("is-blinking", hasReadyPower);
       superPowerStartButton.setAttribute("aria-hidden", hasReadyPower ? "false" : "true");
       if (!hasReadyPower) { superPowerReadyValue.textContent = "Waiting..."; return; }
@@ -961,14 +1021,17 @@
 
       database.ref("gameStatus/superPowerDetail").on("value", (snapshot) => {
         latestSuperPowerDetail = snapshot.val() || "";
+        updateSuperPowerReadyCard(latestSuperPowerDetail, latestSuperPowerState, latestSuperPowerReady);
       }, handleError);
 
       database.ref("gameStatus/superPowerState").on("value", (snapshot) => {
         latestSuperPowerState = snapshot.val() || "none";
+        updateSuperPowerReadyCard(latestSuperPowerDetail, latestSuperPowerState, latestSuperPowerReady);
       }, handleError);
 
       database.ref("gameStatus/superPowerReady").on("value", (snapshot) => {
         const ready = Boolean(snapshot.val());
+        latestSuperPowerReady = ready;
         updateSuperPowerReadyCard(latestSuperPowerDetail, latestSuperPowerState, ready);
       }, handleError);
 
@@ -1022,6 +1085,7 @@
           latestSuperPowerTitle = "";
           latestSuperPowerDetail = "";
           latestSuperPowerState = "none";
+          latestSuperPowerReady = false;
           currentStreakValue.textContent = "0";
           clearEffects();
           stopRoundTimer({ reset: true });
@@ -1122,3 +1186,4 @@
   </script>
 </body>
 </html>
+

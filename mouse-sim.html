@@ -396,7 +396,7 @@
       }
     }
 
-    /* ── Promo Modal ── */
+    /* -- Promo Modal -- */
     .promo-overlay {
       position: fixed;
       inset: 0;
@@ -462,25 +462,91 @@
 
     @media (max-width: 640px) {
       body {
-        padding: 14px;
+        padding: 12px;
+      }
+
+      h1 {
+        max-width: none;
+        font-size: clamp(2.15rem, 10vw, 3.1rem);
       }
 
       .hero,
       .game-panel,
       .score-panel {
-        padding: 22px;
+        padding: 18px;
+        border-radius: 24px;
+      }
+
+      .panel-head {
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .panel-head h2 {
+        font-size: 1.85rem;
+        line-height: 1.02;
       }
 
       .board {
         grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .fun-fact-card {
+        flex-direction: column;
       }
 
       .hero-actions {
         flex-direction: column;
+        gap: 10px;
+        margin-top: 18px;
       }
 
       button {
         width: 100%;
+        padding: 13px 16px;
+        font-size: 0.98rem;
+      }
+
+      .status-badge {
+        padding: 8px 12px;
+        font-size: 0.84rem;
+      }
+
+      .led-pad {
+        min-height: 148px;
+        padding: 18px;
+      }
+
+      .led-pad strong {
+        font-size: 1.2rem;
+      }
+
+      .led-pad small {
+        margin-top: 8px;
+      }
+
+      .score-panel {
+        gap: 12px;
+      }
+
+      .score-card {
+        padding: 16px;
+        border-radius: 18px;
+      }
+
+      .score-card strong {
+        font-size: clamp(1.45rem, 7vw, 2rem);
+      }
+
+      .hint {
+        padding: 12px 14px;
+        border-radius: 16px;
+      }
+
+      .promo-card {
+        padding: 28px 22px;
       }
     }
   </style>
@@ -557,21 +623,21 @@
 
         <div class="fun-facts-container">
           <div class="fun-fact-card">
-            <div class="fun-fact-icon">⚡</div>
+            <div class="fun-fact-icon">?</div>
             <div class="fun-fact-content">
               <h4>Average Human Reaction</h4>
               <p>The typical response time to visual stimuli is ~250ms. Can you beat the global average today?</p>
             </div>
           </div>
           <div class="fun-fact-card">
-            <div class="fun-fact-icon">🏆</div>
+            <div class="fun-fact-icon">??</div>
             <div class="fun-fact-content">
               <h4>Pro-Level Reflexes</h4>
               <p>Elite athletes and pro gamers often clock in under 200ms. Keep practicing to reach the top tier!</p>
             </div>
           </div>
           <div class="fun-fact-card">
-            <div class="fun-fact-icon">🧠</div>
+            <div class="fun-fact-icon">??</div>
             <div class="fun-fact-content">
               <h4>Mind & Body Sync</h4>
               <p>Games like SmartWarm help sharpen hand-eye coordination and improve peripheral vision awareness.</p>

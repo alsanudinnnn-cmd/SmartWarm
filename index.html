@@ -18,11 +18,12 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
   <script src="cloudinary-config.js"></script>
+  <script src="nav.js" defer></script>
 </head>
 
 <body class="page-home">
   <div class="site-shell">
-    <header class="site-header">
+    <header class="site-header" data-site-header>
       <a class="brand" href="index.html">
         <span class="brand-mark">SW</span>
         <span class="brand-copy">
@@ -31,14 +32,27 @@
         </span>
       </a>
 
-      <nav class="site-nav">
+      <button
+        class="nav-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="primaryNav"
+        aria-label="Toggle navigation"
+        data-nav-toggle
+      >
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+        <span class="nav-toggle-line"></span>
+      </button>
+
+      <nav class="site-nav" id="primaryNav" data-nav-menu>
         <a href="#experience">Experience</a>
         <a href="mouse-sim.html">Mouse Demo</a>
         <a href="result.html">Leaderboard</a>
         <a href="contact.html">Order Console</a>
         <a href="admin.html" class="nav-circle-btn" title="Admin Panel">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
             <circle cx="12" cy="12" r="3"/>
           </svg>
         </a>
@@ -73,7 +87,7 @@
             </article>
             <article>
               <strong>Event friendly</strong>
-              <span>Responsive layout for laptops, tablets, and kiosks</span>
+              <span>Responsive layout for laptops, tablets, and phones</span>
             </article>
           </div>
         </div>
@@ -327,38 +341,35 @@
             return (Number(a.timeTaken) || 0) - (Number(b.timeTaken) || 0);
           });
 
-        leaderboardBody.innerHTML = resultsArray.map((item, index) => `
-          ${(() => {
-            const playerName = item.playerName ?? item.name ?? "Unknown";
-            const playerImage = item.playerImage ?? item.image ?? "";
-            const timeTaken = Number(item.timeTaken);
-            const score = item.score ?? 0;
-            const bestStreak = item.bestStreak ?? 0;
+        leaderboardBody.innerHTML = resultsArray.map((item, index) => {
+          const playerName = item.playerName ?? item.name ?? "Unknown";
+          const playerImage = item.playerImage ?? item.image ?? "";
+          const timeTaken = Number(item.timeTaken);
+          const score = Number(item.score ?? 0);
+          const bestStreak = item.bestStreak ?? 0;
 
-            const imageMarkup = playerImage
-              ? `<img src="${playerImage}" alt="${playerName}">`
-              : `<div class="player-avatar-fallback" aria-hidden="true">${playerName.charAt(0).toUpperCase()}</div>`;
+          const imageMarkup = playerImage
+            ? `<img src="${playerImage}" alt="${playerName}">`
+            : `<div class="player-avatar-fallback" aria-hidden="true">${playerName.charAt(0).toUpperCase()}</div>`;
 
-            return `
-          <tr>
-            <td>${index + 1}</td>
-            <td>
-              <div class="player-cell">
-                ${imageMarkup}
-                <div>
-                  <strong>${playerName}</strong>
+          return `
+            <tr>
+              <td>${index + 1}</td>
+              <td>
+                <div class="player-cell">
+                  ${imageMarkup}
+                  <div>
+                    <strong>${playerName}</strong>
+                  </div>
                 </div>
-              </div>
-            </td>
-            <td><strong>${score}</strong></td>
-            <td>${Number.isFinite(timeTaken) ? `${timeTaken}s` : "-"}</td>
-            <td>${bestStreak}</td>
-          </tr>
-            `;
-          })()}
-        `).join("");
+              </td>
+              <td><strong>${score}</strong></td>
+              <td>${Number.isFinite(timeTaken) ? `${timeTaken}s` : "-"}</td>
+              <td>${bestStreak}</td>
+            </tr>
+          `;
+        }).join("");
       }, handleDatabaseError);
-
     }
 
     signInAnonymously()
