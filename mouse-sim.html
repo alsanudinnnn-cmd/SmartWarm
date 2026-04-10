@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartWarm Mouse Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-top: #3b1774;
+      --bg-bottom: #14011f;
+      --panel: rgba(25, 11, 45, 0.78);
+      --panel-muted: rgba(255, 255, 255, 0.06);
+      --text: #f5eefe;
+      --muted: #c8b5ea;
+      --accent: #ffb84d;
+      --accent-strong: #ff8f2b;
+      --teal: #5eead4;
+      --line: rgba(232, 201, 255, 0.12);
+      --shadow: 0 24px 70px rgba(7, 1, 16, 0.42);
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 24px;
+      font-family: "Manrope", sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(145deg, rgba(114, 31, 191, 0.16), transparent 42%),
+        linear-gradient(180deg, var(--bg-top) 0%, #2a0c4f 38%, var(--bg-bottom) 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.06) 0 34px, transparent 35px),
+        radial-gradient(circle at 82% 28%, rgba(255, 255, 255, 0.05) 0 28px, transparent 29px),
+        linear-gradient(115deg, transparent 0 49.4%, rgba(210, 60, 255, 0.9) 49.8%, rgba(210, 60, 255, 0.9) 50.2%, transparent 50.6%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+      opacity: 0.95;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.95;
+      background-image:
+        radial-gradient(circle at 10% 10%, transparent 0 52px, rgba(156, 89, 214, 0.22) 52px 56px, transparent 56px),
+        radial-gradient(circle at 30% 28%, transparent 0 120px, rgba(156, 89, 214, 0.18) 120px 124px, transparent 124px),
+        radial-gradient(circle at 78% 25%, transparent 0 96px, rgba(156, 89, 214, 0.16) 96px 100px, transparent 100px),
+        radial-gradient(circle at 18% 74%, transparent 0 150px, rgba(156, 89, 214, 0.12) 150px 154px, transparent 154px),
+        radial-gradient(circle at 84% 72%, transparent 0 170px, rgba(156, 89, 214, 0.13) 170px 174px, transparent 174px);
+      background-size: cover;
+    }
+
+    .shell {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero,
+    .game-panel,
+    .score-panel {
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+      gap: 22px;
+      padding: 30px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      margin-bottom: 16px;
+      color: #f1baff;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    .hero-stat strong,
+    .score-card strong {
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    h1 {
+      max-width: 10ch;
+      margin-bottom: 14px;
+      font-size: clamp(2.6rem, 6vw, 4.8rem);
+      line-height: 0.96;
+    }
+
+    .hero p,
+    .score-card span,
+    .subtle,
+    .status-line {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 22px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary {
+      background: linear-gradient(180deg, #ffd47a, var(--accent-strong));
+      color: #2f1600;
+      box-shadow: 0 18px 38px rgba(255, 163, 64, 0.26);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .secondary {
+      background: rgba(94, 234, 212, 0.12);
+      color: #d9fffb;
+      border: 1px solid rgba(94, 234, 212, 0.28);
+    }
+
+    .hero-stats {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-stat {
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-stat strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.3rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) 320px;
+      gap: 22px;
+    }
+
+    .game-panel,
+    .score-panel {
+      padding: 28px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .panel-head h2 {
+      margin-bottom: 8px;
+      font-size: 2rem;
+    }
+
+    .status-badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #f6ddff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .fun-facts-container {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 14px;
+    }
+
+    .fun-fact-card {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .fun-fact-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .fun-fact-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      color: var(--accent);
+      background: rgba(255, 184, 77, 0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+
+    .fun-fact-content h4 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .fun-fact-content p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .led-pad {
+      position: relative;
+      min-height: 180px;
+      padding: 20px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      color: #fdf8ff;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .led-pad::after {
+      content: "";
+      position: absolute;
+      inset: auto 20px 20px auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .led-pad span {
+      display: block;
+      margin-bottom: 14px;
+      color: #d6b6fa;
+      font-size: 0.85rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .led-pad strong {
+      display: block;
+      font-size: 1.45rem;
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .led-pad small {
+      display: block;
+      margin-top: 10px;
+      color: rgba(245, 238, 254, 0.72);
+    }
+
+    .led-pad.active {
+      background: linear-gradient(180deg, #ff84ea, #b93cff);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12), 0 0 46px rgba(196, 70, 255, 0.34);
+      transform: translateY(-2px);
+    }
+
+    .led-pad.active::after {
+      background: #fff3ec;
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.8);
+      transform: scale(1.15);
+    }
+
+    .led-pad.miss {
+      animation: shake 220ms ease;
+    }
+
+    .status-line {
+      margin-top: 18px;
+      min-height: 26px;
+      font-weight: 600;
+    }
+
+    .score-panel {
+      display: grid;
+      align-content: start;
+      gap: 16px;
+    }
+
+    .score-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: var(--panel-muted);
+      border: 1px solid var(--line);
+    }
+
+    .score-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+    }
+
+    .score-card span {
+      display: block;
+    }
+
+    .hint-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .hint {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      line-height: 1.55;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    @keyframes shake {
+      0% {
+        transform: translateX(0);
+      }
+
+      30% {
+        transform: translateX(-4px);
+      }
+
+      60% {
+        transform: translateX(4px);
+      }
+
+      100% {
+        transform: translateX(0);
+      }
+    }
+
+    /* ── Promo Modal ── */
+    .promo-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      background: rgba(10, 2, 20, 0.78);
+      backdrop-filter: blur(14px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 280ms ease;
+    }
+
+    .promo-overlay.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .promo-card {
+      width: min(520px, calc(100vw - 36px));
+      padding: 40px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: linear-gradient(180deg, rgba(42, 18, 72, 0.95), rgba(20, 6, 38, 0.95));
+      box-shadow: 0 32px 80px rgba(6, 1, 14, 0.5);
+      text-align: center;
+      transform: translateY(20px) scale(0.95);
+      transition: transform 280ms cubic-bezier(.2, .89, .23, 1), opacity 280ms ease;
+    }
+
+    .promo-overlay.is-visible .promo-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .promo-card h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      background: linear-gradient(180deg, #fff, #ffd47a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .promo-card p {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 1.05rem;
+      margin-bottom: 32px;
+    }
+
+    .promo-actions {
+      display: grid;
+      gap: 12px;
+    }
+
+    @media (max-width: 920px) {
+
+      .hero,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 14px;
+      }
+
+      .hero,
+      .game-panel,
+      .score-panel {
+        padding: 22px;
+      }
+
+      .board {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Pure browser demo</p>
+        <h1>SmartWarm LED game, simulated with your mouse.</h1>
+        <p>
+          One LED lights up at a time. Click the glowing tile as fast as you can
+          before the timer runs out. No database, no device, no setup.
+        </p>
+
+        <div class="hero-actions">
+          <button class="primary" id="startButton" type="button">Start game</button>
+          <button class="secondary" id="resetButton" type="button">Reset</button>
+          <button class="secondary" onclick="window.location.href='index.html'" type="button">Back to Home</button>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <article class="hero-stat">
+          <strong>30 seconds</strong>
+          <p class="subtle">Arcade-style round with speed ramping up over time.</p>
+        </article>
+        <article class="hero-stat">
+          <strong>Mouse only</strong>
+          <p class="subtle">Click the active LED tile to score points instantly.</p>
+        </article>
+        <article class="hero-stat">
+          <strong>Score + accuracy</strong>
+          <p class="subtle">Track hits, misses, streak, and average reaction time.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="game-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Game board</p>
+            <h2>Hit the active LED</h2>
+          </div>
+          <div class="status-badge" id="roundState">Ready</div>
+        </div>
+
+        <div class="board" id="board">
+          <button class="led-pad" data-index="0" type="button">
+            <span>01</span>
+            <strong>Top Left</strong>
+            <small>Click when lit</small>
+          </button>
+          <button class="led-pad" data-index="1" type="button">
+            <span>02</span>
+            <strong>Top Right</strong>
+            <small>Click when lit</small>
+          </button>
+          <button class="led-pad" data-index="2" type="button">
+            <span>03</span>
+            <strong>Bottom Left</strong>
+            <small>Click when lit</small>
+          </button>
+          <button class="led-pad" data-index="3" type="button">
+            <span>04</span>
+            <strong>Bottom Right</strong>
+            <small>Click when lit</small>
+          </button>
+        </div>
+
+        <p class="status-line" id="statusLine">Press Start to begin a 30-second round.</p>
+
+        <div class="fun-facts-container">
+          <div class="fun-fact-card">
+            <div class="fun-fact-icon">⚡</div>
+            <div class="fun-fact-content">
+              <h4>Average Human Reaction</h4>
+              <p>The typical response time to visual stimuli is ~250ms. Can you beat the global average today?</p>
+            </div>
+          </div>
+          <div class="fun-fact-card">
+            <div class="fun-fact-icon">🏆</div>
+            <div class="fun-fact-content">
+              <h4>Pro-Level Reflexes</h4>
+              <p>Elite athletes and pro gamers often clock in under 200ms. Keep practicing to reach the top tier!</p>
+            </div>
+          </div>
+          <div class="fun-fact-card">
+            <div class="fun-fact-icon">🧠</div>
+            <div class="fun-fact-content">
+              <h4>Mind & Body Sync</h4>
+              <p>Games like SmartWarm help sharpen hand-eye coordination and improve peripheral vision awareness.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="score-panel">
+        <div class="score-card">
+          <span>Score</span>
+          <strong id="scoreValue">0</strong>
+        </div>
+        <div class="score-card">
+          <span>Time left</span>
+          <strong id="timeValue">30.0s</strong>
+        </div>
+        <div class="score-card">
+          <span>Accuracy</span>
+          <strong id="accuracyValue">0%</strong>
+        </div>
+        <div class="score-card">
+          <span>Streak</span>
+          <strong id="streakValue">0</strong>
+        </div>
+        <div class="score-card">
+          <span>Avg reaction</span>
+          <strong id="reactionValue">0 ms</strong>
+        </div>
+
+        <div class="hint-list">
+          <div class="hint">Click the glowing tile to score `+1`.</div>
+          <div class="hint">Clicking the wrong tile counts as a miss and breaks your streak.</div>
+          <div class="hint">The active LED changes faster as the round goes on.</div>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <!-- Promo Modal -->
+  <div class="promo-overlay" id="promoOverlay">
+    <div class="promo-card">
+      <h3>Love the demo?</h3>
+      <p>Experience the thrill in real life. Order your SmartWarm LED console today and challenge your friends!</p>
+      <div class="promo-actions">
+        <button class="primary" onclick="window.location.href='contact.html'">Order Console Now</button>
+        <button class="secondary" onclick="closePromoModal()">Play Again</button>
+        <button class="secondary" onclick="window.location.href='index.html'">Back to Home</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GAME_LENGTH_MS = 30000;
+    const pads = Array.from(document.querySelectorAll(".led-pad"));
+    const startButton = document.getElementById("startButton");
+    const resetButton = document.getElementById("resetButton");
+    const roundState = document.getElementById("roundState");
+    const statusLine = document.getElementById("statusLine");
+
+    const scoreValue = document.getElementById("scoreValue");
+    const timeValue = document.getElementById("timeValue");
+    const accuracyValue = document.getElementById("accuracyValue");
+    const streakValue = document.getElementById("streakValue");
+    const reactionValue = document.getElementById("reactionValue");
+
+    let gameActive = false;
+    let activeIndex = -1;
+    let score = 0;
+    let hits = 0;
+    let misses = 0;
+    let streak = 0;
+    let totalReaction = 0;
+    let lightStartedAt = 0;
+    let roundStartedAt = 0;
+    let roundTimer = null;
+    let nextLightTimer = null;
+
+    function updateStats() {
+      const attempts = hits + misses;
+      const accuracy = attempts ? Math.round((hits / attempts) * 100) : 0;
+      const averageReaction = hits ? Math.round(totalReaction / hits) : 0;
+
+      scoreValue.textContent = String(score);
+      accuracyValue.textContent = `${accuracy}%`;
+      streakValue.textContent = String(streak);
+      reactionValue.textContent = `${averageReaction} ms`;
+    }
+
+    function updateTime() {
+      if (!gameActive) {
+        return;
+      }
+
+      const elapsed = Date.now() - roundStartedAt;
+      const remaining = Math.max(0, GAME_LENGTH_MS - elapsed);
+      timeValue.textContent = `${(remaining / 1000).toFixed(1)}s`;
+
+      if (remaining <= 0) {
+        finishGame();
+      }
+    }
+
+    function clearActivePad() {
+      pads.forEach((pad) => pad.classList.remove("active"));
+      activeIndex = -1;
+    }
+
+    function getSpawnDelay() {
+      const elapsed = Date.now() - roundStartedAt;
+      const progress = Math.min(elapsed / GAME_LENGTH_MS, 1);
+      return Math.max(420, 980 - progress * 420);
+    }
+
+    function activateRandomPad() {
+      if (!gameActive) {
+        return;
+      }
+
+      let nextIndex = Math.floor(Math.random() * pads.length);
+      if (pads.length > 1 && nextIndex === activeIndex) {
+        nextIndex = (nextIndex + 1) % pads.length;
+      }
+
+      clearActivePad();
+      activeIndex = nextIndex;
+      pads[activeIndex].classList.add("active");
+      lightStartedAt = Date.now();
+      statusLine.textContent = "Hit the glowing LED before it changes.";
+
+      clearTimeout(nextLightTimer);
+      nextLightTimer = setTimeout(activateRandomPad, getSpawnDelay());
+    }
+
+    function finishGame() {
+      gameActive = false;
+      clearTimeout(nextLightTimer);
+      clearInterval(roundTimer);
+      clearActivePad();
+      roundState.textContent = "Finished";
+      timeValue.textContent = "0.0s";
+      statusLine.textContent = `Round complete. Final score: ${score}. Press Start to play again.`;
+
+      // Delay modal pop slightly so user sees their final score register
+      setTimeout(() => {
+        document.getElementById('promoOverlay').classList.add('is-visible');
+      }, 800);
+    }
+
+    function closePromoModal() {
+      document.getElementById('promoOverlay').classList.remove('is-visible');
+      resetGame();
+    }
+
+    function resetGame() {
+      gameActive = false;
+      clearTimeout(nextLightTimer);
+      clearInterval(roundTimer);
+
+      activeIndex = -1;
+      score = 0;
+      hits = 0;
+      misses = 0;
+      streak = 0;
+      totalReaction = 0;
+      lightStartedAt = 0;
+      roundStartedAt = 0;
+
+      clearActivePad();
+      roundState.textContent = "Ready";
+      statusLine.textContent = "Press Start to begin a 30-second round.";
+      timeValue.textContent = "30.0s";
+      updateStats();
+    }
+
+    function startGame() {
+      resetGame();
+      gameActive = true;
+      roundStartedAt = Date.now();
+      roundState.textContent = "Live";
+      statusLine.textContent = "Go! Click the active LED as quickly as you can.";
+      updateTime();
+      activateRandomPad();
+      roundTimer = setInterval(updateTime, 100);
+    }
+
+    pads.forEach((pad) => {
+      pad.addEventListener("click", () => {
+        const clickedIndex = Number(pad.dataset.index);
+
+        if (!gameActive) {
+          statusLine.textContent = "Start a round first, then click the active LED.";
+          return;
+        }
+
+        if (clickedIndex === activeIndex) {
+          score += 1;
+          hits += 1;
+          streak += 1;
+          totalReaction += Date.now() - lightStartedAt;
+          updateStats();
+          statusLine.textContent = `Nice hit. Current streak: ${streak}.`;
+          activateRandomPad();
+          return;
+        }
+
+        misses += 1;
+        streak = 0;
+        updateStats();
+        pad.classList.add("miss");
+        setTimeout(() => pad.classList.remove("miss"), 240);
+        statusLine.textContent = "Wrong LED. Find the glowing tile.";
+      });
+    });
+
+    startButton.addEventListener("click", startGame);
+    resetButton.addEventListener("click", resetGame);
+
+    resetGame();
+  </script>
+</body>
+
+</html>

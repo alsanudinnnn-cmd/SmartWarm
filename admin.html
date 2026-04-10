@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartWarm | Admin Panel</title>
+  <meta name="description" content="Admin control panel for managing SmartWarm game results and player data.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    /* ── Admin-specific styles ── */
+    .admin-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      padding: 36px;
+      margin-bottom: 24px;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+        var(--surface);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+
+    .admin-hero h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 0.95;
+      margin-bottom: 12px;
+    }
+
+    .admin-hero p {
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 52ch;
+    }
+
+    .admin-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .admin-stat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .admin-stat strong {
+      color: var(--text);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.1rem;
+    }
+
+    .admin-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .admin-search {
+      flex: 1;
+      min-width: 200px;
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.95rem;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .admin-search:focus {
+      outline: none;
+      border-color: rgba(255, 184, 77, 0.48);
+      box-shadow: 0 0 0 4px rgba(255, 184, 77, 0.12);
+    }
+
+    .admin-search::placeholder {
+      color: rgba(200, 181, 234, 0.52);
+    }
+
+    .button-danger {
+      background: linear-gradient(180deg, #ff6b6b, #e63946);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 12px 28px rgba(230, 57, 70, 0.22);
+    }
+
+    .button-danger:hover {
+      box-shadow: 0 16px 38px rgba(230, 57, 70, 0.36);
+    }
+
+    .button-sm {
+      min-height: 40px;
+      padding: 0 16px;
+      font-size: 0.85rem;
+    }
+
+    .admin-panel {
+      padding: 32px;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+        var(--surface);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+
+    .admin-table-wrap {
+      overflow-x: auto;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .admin-table thead th {
+      padding: 0 0 16px;
+      text-align: left;
+      color: #e4c5ff;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .admin-table thead th:last-child {
+      text-align: center;
+    }
+
+    .admin-table tbody td {
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    .admin-table tbody tr {
+      transition: background 180ms ease;
+    }
+
+    .admin-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .admin-table tbody tr.is-selected {
+      background: rgba(255, 184, 77, 0.08);
+    }
+
+    .admin-player-cell {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .admin-player-cell img {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .admin-player-cell .avatar-fallback {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ff84ea, #b93cff);
+      color: #fff7ff;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .admin-player-info {
+      display: grid;
+      gap: 2px;
+    }
+
+    .admin-player-info strong {
+      font-size: 0.96rem;
+    }
+
+    .admin-player-info span {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .badge-score {
+      background: rgba(255, 184, 77, 0.16);
+      color: #ffd47a;
+    }
+
+    .badge-streak {
+      background: rgba(94, 234, 212, 0.14);
+      color: #5eead4;
+    }
+
+    .badge-time {
+      background: rgba(156, 130, 255, 0.16);
+      color: #c8b5ea;
+    }
+
+    .admin-actions-cell {
+      text-align: center;
+    }
+
+    .delete-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.22);
+      color: #ff8a8a;
+      cursor: pointer;
+      transition: all 180ms ease;
+    }
+
+    .delete-btn:hover {
+      background: rgba(255, 107, 107, 0.22);
+      border-color: rgba(255, 107, 107, 0.44);
+      color: #ff6b6b;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(255, 107, 107, 0.18);
+    }
+
+    .delete-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .select-checkbox {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: all 180ms ease;
+      position: relative;
+    }
+
+    .select-checkbox:checked {
+      background: linear-gradient(180deg, #ffd47a, var(--primary-strong));
+      border-color: rgba(255, 184, 77, 0.52);
+    }
+
+    .select-checkbox:checked::after {
+      content: "✓";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #2f1600;
+      font-size: 0.72rem;
+      font-weight: 900;
+    }
+
+    .empty-state-admin {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state-admin svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 18px;
+      fill: none;
+      stroke: rgba(200, 181, 234, 0.34);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .empty-state-admin p {
+      font-size: 1.08rem;
+      margin-bottom: 6px;
+    }
+
+    .empty-state-admin span {
+      font-size: 0.88rem;
+      color: rgba(200, 181, 234, 0.56);
+    }
+
+    /* ── Confirmation modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      background: rgba(10, 2, 20, 0.68);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 260ms ease;
+    }
+
+    .modal-overlay.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      width: min(460px, calc(100vw - 36px));
+      padding: 32px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background:
+        linear-gradient(180deg, rgba(42, 18, 72, 0.98), rgba(20, 6, 38, 0.98));
+      box-shadow: 0 32px 80px rgba(6, 1, 14, 0.5);
+      text-align: center;
+      transform: translateY(20px) scale(0.94);
+      transition: transform 260ms cubic-bezier(.19, .89, .23, 1), opacity 260ms ease;
+    }
+
+    .modal-overlay.is-visible .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 18px;
+      border-radius: 50%;
+      background: rgba(255, 107, 107, 0.14);
+      border: 1px solid rgba(255, 107, 107, 0.28);
+    }
+
+    .modal-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: none;
+      stroke: #ff8a8a;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .modal-card h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.45rem;
+      margin-bottom: 10px;
+    }
+
+    .modal-card p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    /* ── Toast notification ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      z-index: 200;
+      padding: 14px 24px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 320ms cubic-bezier(.19, .89, .23, 1), opacity 320ms ease;
+      box-shadow: 0 16px 40px rgba(6, 1, 14, 0.38);
+    }
+
+    .toast.is-visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-success {
+      background: linear-gradient(180deg, #86fff0, #32cdbd);
+      color: #052726;
+    }
+
+    .toast-error {
+      background: linear-gradient(180deg, #ff9f9f, #e63946);
+      color: #fff;
+    }
+
+    /* ── Tabs ── */
+    .admin-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .admin-tab {
+      padding: 12px 24px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 180ms ease;
+    }
+
+    .admin-tab:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .admin-tab.is-active {
+      background: linear-gradient(180deg, #ffd47a, var(--primary-strong));
+      color: #2f1600;
+      border-color: rgba(255, 184, 77, 0.52);
+      box-shadow: 0 8px 24px rgba(255, 163, 64, 0.2);
+    }
+
+    /* WhatsApp button */
+    .btn-whatsapp {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #25D366;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: all 180ms ease;
+      border: 2px solid transparent;
+    }
+
+    .btn-whatsapp:hover {
+      background: #128C7E;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-whatsapp svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .admin-panel-section {
+      display: none;
+    }
+    
+    .admin-panel-section.is-active {
+      display: block;
+    }
+
+    /* ── 3D Auth Card ── */
+    #authGate {
+      perspective: 1000px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 20px;
+      min-height: 70vh;
+    }
+
+    .flip-container {
+      width: min(400px, 100%);
+      height: 480px;
+      position: relative;
+    }
+
+    .flipper {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+      transition: transform 600ms cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .flipper.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .flip-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)), var(--surface);
+      backdrop-filter: blur(24px);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flip-face.back {
+      transform: rotateY(180deg);
+    }
+
+    .auth-title {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 2rem;
+      margin-bottom: 24px;
+      text-align: center;
+      background: linear-gradient(180deg, #fff, #ebd4ff);
+      -webkit-background-clip: text;
+      background-clip: text; /* standard property */
+      -webkit-text-fill-color: transparent;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .auth-form input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: rgba(10, 2, 20, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-family: "Manrope", sans-serif;
+      font-size: 1rem;
+      transition: all 200ms ease;
+    }
+
+    .auth-form input:focus {
+      outline: none;
+      border-color: rgba(94, 234, 212, 0.6);
+      box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.15);
+    }
+
+    .auth-btn {
+      margin-top: auto;
+      padding: 16px;
+      border: none;
+      border-radius: 999px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 200ms ease;
+    }
+
+    .auth-btn-primary {
+      background: linear-gradient(180deg, #5eead4, #14b8a6);
+      color: #042f2e;
+      box-shadow: 0 8px 24px rgba(20, 184, 166, 0.25);
+    }
+
+    .auth-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(20, 184, 166, 0.35);
+      background: linear-gradient(180deg, #ccfbf1, #5eead4);
+    }
+
+    .auth-link {
+      margin-top: 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .auth-link button {
+      background: none;
+      border: none;
+      color: #5eead4;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .auth-link button:hover {
+      text-decoration: underline;
+    }
+    
+    .nav-logout {
+      display: none;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px 14px;
+      border-radius: 999px;
+      color: var(--text);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .nav-logout:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    @media (max-width: 768px) {
+      .admin-hero {
+        padding: 24px;
+      }
+
+      .admin-panel {
+        padding: 20px;
+      }
+
+      .admin-toolbar {
+        flex-direction: column;
+      }
+
+      .admin-search {
+        min-width: unset;
+        width: 100%;
+      }
+
+      .admin-table thead th:nth-child(4),
+      .admin-table tbody td:nth-child(4),
+      .admin-table thead th:nth-child(5),
+      .admin-table tbody td:nth-child(5) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body class="page-admin">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">SW</span>
+        <span class="brand-copy">
+          <strong>SmartWarm</strong>
+          <span>Interactive LED Challenge</span>
+        </span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="result.html">Leaderboard</a>
+        <a href="contact.html">Order Console</a>
+        <button id="logoutBtn" class="nav-logout" onclick="logoutAdmin()">Log Out</button>
+      </nav>
+    </header>
+
+    <!-- AUTH GATE -->
+    <div id="authGate">
+      <div class="flip-container">
+        <div class="flipper" id="flipperCard">
+          
+          <!-- Front Face: Login -->
+          <div class="flip-face front">
+            <h2 class="auth-title">Admin Login</h2>
+            <form class="auth-form" id="loginForm">
+              <input type="text" id="loginUser" placeholder="Username" required>
+              <input type="password" id="loginPass" placeholder="Password" required>
+              <button type="submit" class="auth-btn auth-btn-primary">Login</button>
+            </form>
+            <div class="auth-link">
+              Don't have an account? <button onclick="toggleFlip(true)">Register here</button>
+            </div>
+          </div>
+
+          <!-- Back Face: Register -->
+          <div class="flip-face back">
+            <h2 class="auth-title">Register</h2>
+            <form class="auth-form" id="registerForm">
+              <input type="text" id="regUser" placeholder="Choose a Username" required pattern="[A-Za-z0-9]+" title="Letters and numbers only">
+              <input type="password" id="regPass" placeholder="Choose a Password" required>
+              <button type="submit" class="auth-btn auth-btn-primary">Register</button>
+            </form>
+            <div class="auth-link">
+              Already have an account? <button onclick="toggleFlip(false)">Login here</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <main id="adminApp" style="display: none;">
+      <section class="admin-hero">
+        <p class="eyebrow">Admin control panel</p>
+        <h1>Manage game results</h1>
+        <p>
+          View, search, and delete player results from the Firebase database
+          directly from here—no need to open the Firebase console.
+        </p>
+        <div class="admin-stats">
+          <div class="admin-stat">
+            <strong id="totalPlayers">0</strong> Total Players
+          </div>
+          <div class="admin-stat">
+            <strong id="topScore">0</strong> Top Score
+          </div>
+          <div class="admin-stat">
+            <strong id="avgScore">0</strong> Avg Score
+          </div>
+        </div>
+      </section>
+
+      <div class="admin-tabs">
+        <button class="admin-tab is-active" id="tabLeaderboard" onclick="switchTab('leaderboard')">Leaderboard</button>
+        <button class="admin-tab" id="tabOrders" onclick="switchTab('orders')">Orders</button>
+      </div>
+
+      <section class="admin-panel admin-panel-section is-active" id="panelLeaderboard">
+        <div class="panel-heading">
+          <p class="eyebrow">Player results</p>
+          <h2>Database records</h2>
+          <p>Select individual rows to delete, or clear the full result history in one action.</p>
+        </div>
+
+        <div class="admin-toolbar">
+          <input
+            type="text"
+            class="admin-search"
+            id="searchInput"
+            placeholder="Search player by name..."
+            autocomplete="off"
+          >
+          <button class="button button-danger button-sm" id="deleteSelectedBtn" disabled onclick="deleteSelected()">
+            Delete selected
+          </button>
+          <button class="button button-danger button-sm" id="deleteAllBtn" onclick="confirmDeleteAll()">
+            Delete all results
+          </button>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width:42px;">
+                  <input type="checkbox" class="select-checkbox" id="selectAll" onchange="toggleSelectAll()">
+                </th>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Score</th>
+                <th>Time</th>
+                <th>Avg Reaction</th>
+                <th>Stage</th>
+                <th>Powers Used</th>
+                <th>Streak</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody">
+              <tr>
+                <td colspan="10">
+                  <div class="empty-state-admin">
+                    <svg viewBox="0 0 64 64">
+                      <path d="M32 8v48M8 32h48" />
+                      <circle cx="32" cy="32" r="24" />
+                    </svg>
+                    <p>No results yet</p>
+                    <span>Game results will appear here once players complete challenges.</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ORDERS PANEL -->
+      <section class="admin-panel admin-panel-section" id="panelOrders">
+        <div class="panel-heading">
+          <p class="eyebrow">Sales CRM</p>
+          <h2>Console Orders</h2>
+          <p>Review customer entries from the promotional website and contact them directly.</p>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Contact</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state-admin">
+                    <p>Loading orders...</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Confirm Delete Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal-card">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+          <line x1="10" y1="11" x2="10" y2="17" />
+          <line x1="14" y1="11" x2="14" y2="17" />
+        </svg>
+      </div>
+      <h3 id="modalTitle">Delete result?</h3>
+      <p id="modalText">This action cannot be undone. The player result will be permanently removed from the database.</p>
+      <div class="modal-actions">
+        <button class="button button-secondary button-sm" onclick="closeModal()">Cancel</button>
+        <button class="button button-danger button-sm" id="confirmDeleteBtn" onclick="executePendingDelete()">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const { database: db, signInAnonymously } = window.smartWarmFirebase;
+    const adminTableBody = document.getElementById("adminTableBody");
+    const searchInput = document.getElementById("searchInput");
+    const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
+    const selectAllCheckbox = document.getElementById("selectAll");
+    const totalPlayersEl = document.getElementById("totalPlayers");
+    const topScoreEl = document.getElementById("topScore");
+    const avgScoreEl = document.getElementById("avgScore");
+
+    let allResults = [];
+    let allOrders = [];
+    let selectedKeys = new Set();
+    let pendingDeleteAction = null;
+
+    /* ── AUTH FLIP LOGIC ── */
+    function toggleFlip(isFlippingToRegister) {
+      const flipper = document.getElementById('flipperCard');
+      if (isFlippingToRegister) {
+        flipper.classList.add('is-flipped');
+      } else {
+        flipper.classList.remove('is-flipped');
+      }
+    }
+
+    /* ── CUSTOM DB AUTH LOGIC ── */
+    signInAnonymously().catch(err => console.error("Firebase connection error", err));
+
+    const authGate = document.getElementById('authGate');
+    const adminApp = document.getElementById('adminApp');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Check localStorage auto-login on standard load
+    if (localStorage.getItem("adminLogged") === "true") {
+      unlockDashboard();
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = document.getElementById('regUser').value.trim();
+      const pass = document.getElementById('regPass').value;
+      
+      const btn = e.target.querySelector('button');
+      btn.textContent = 'Registering...';
+
+      // Push exactly as requested to /admins in DB
+      db.ref("admins").push({
+        username: user,
+        password: pass
+      }).then(() => {
+        alert("Registered successfully! Flipping back to login...");
+        document.getElementById('registerForm').reset();
+        toggleFlip(false);
+      }).catch(err => {
+        alert("Error registering. Please try again.");
+      }).finally(() => {
+        btn.textContent = 'Register';
+      });
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      
+      const btn = e.target.querySelector('button');
+      btn.textContent = 'Checking...';
+
+      // Validate exactly as requested
+      db.ref("admins").once("value").then(snapshot => {
+        const admins = snapshot.val();
+        let isValid = false;
+
+        if (admins) {
+          Object.values(admins).forEach(a => {
+            if (a.username === user && a.password === pass) {
+              isValid = true;
+            }
+          });
+        }
+
+        if (isValid) {
+          localStorage.setItem("adminLogged", "true");
+          document.getElementById('loginForm').reset();
+          unlockDashboard();
+        } else {
+          alert("Invalid username or password.");
+        }
+      }).catch(err => {
+        alert("Error connecting to database.");
+      }).finally(() => {
+        btn.textContent = 'Login';
+      });
+    });
+
+    function unlockDashboard() {
+      authGate.style.display = 'none';
+      adminApp.style.display = 'block';
+      logoutBtn.style.display = 'inline-block';
+      attachListener(); // Only load dashboard data after login!
+    }
+
+    function logoutAdmin() {
+      localStorage.removeItem("adminLogged");
+      adminApp.style.display = 'none';
+      logoutBtn.style.display = 'none';
+      authGate.style.display = 'flex';
+      
+      // Clear data for security
+      document.getElementById("adminTableBody").innerHTML = "";
+      document.getElementById("ordersTableBody").innerHTML = "";
+    }
+
+
+    /* ── Tabs Logic ── */
+    function switchTab(tabId) {
+      document.getElementById('tabLeaderboard').classList.toggle('is-active', tabId === 'leaderboard');
+      document.getElementById('tabOrders').classList.toggle('is-active', tabId === 'orders');
+      
+      document.getElementById('panelLeaderboard').classList.toggle('is-active', tabId === 'leaderboard');
+      document.getElementById('panelOrders').classList.toggle('is-active', tabId === 'orders');
+    }
+
+    /* ── Firebase listener ── */
+    function attachListener() {
+      db.ref("gameResults").on("value", (snapshot) => {
+        const data = snapshot.val();
+
+        if (!data) {
+          allResults = [];
+          updateStats();
+          renderTable();
+          return;
+        }
+
+        allResults = Object.entries(data)
+          .map(([key, value]) => ({ key, ...value }))
+          .sort((a, b) => {
+            const scoreDiff = (Number(b.score) || 0) - (Number(a.score) || 0);
+            if (scoreDiff !== 0) return scoreDiff;
+            return (Number(a.timeTaken) || 0) - (Number(b.timeTaken) || 0);
+          });
+
+        updateStats();
+        renderTable();
+      }, (error) => {
+        console.error("Firebase error:", error);
+        adminTableBody.innerHTML = `
+          <tr><td colspan="10">
+            <div class="empty-state-admin">
+              <p>Failed to load results</p>
+              <span>${error.message}</span>
+            </div>
+          </td></tr>`;
+      });
+      
+      db.ref("orders").on("value", (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+          allOrders = [];
+          renderOrdersTable();
+          return;
+        }
+
+        allOrders = Object.entries(data)
+          .map(([key, value]) => ({ key, ...value }))
+          .sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0));
+
+        renderOrdersTable();
+      });
+    }
+
+    /* ── Statistics ── */
+    function updateStats() {
+      const count = allResults.length;
+      totalPlayersEl.textContent = count;
+
+      if (count === 0) {
+        topScoreEl.textContent = "0";
+        avgScoreEl.textContent = "0";
+        return;
+      }
+
+      const scores = allResults.map(r => Number(r.score) || 0);
+      topScoreEl.textContent = Math.max(...scores);
+      avgScoreEl.textContent = Math.round(scores.reduce((a, b) => a + b, 0) / count);
+    }
+
+    /* ── Render table ── */
+    function renderTable() {
+      const query = searchInput.value.trim().toLowerCase();
+      const filtered = query
+        ? allResults.filter(r => {
+            const name = (r.playerName ?? r.name ?? "").toLowerCase();
+            return name.includes(query);
+          })
+        : allResults;
+
+      if (filtered.length === 0) {
+        adminTableBody.innerHTML = `
+          <tr><td colspan="10">
+            <div class="empty-state-admin">
+              <svg viewBox="0 0 64 64">
+                <path d="M32 8v48M8 32h48" />
+                <circle cx="32" cy="32" r="24" />
+              </svg>
+              <p>${query ? "No matching players" : "No results yet"}</p>
+              <span>${query ? "Try a different search term." : "Game results will appear here once players complete challenges."}</span>
+            </div>
+          </td></tr>`;
+        updateSelectionUI();
+        return;
+      }
+
+      adminTableBody.innerHTML = filtered
+        .map((item, index) => {
+          const playerName = item.playerName ?? item.name ?? "Unknown";
+          const playerImage = item.playerImage ?? item.image ?? "";
+          const timeTaken = Number(item.timeTaken);
+          const score = item.score ?? 0;
+          const avgReactionTime = item.avgReactionTime ?? 0;
+          const stage = item.stage ?? 1;
+          const bestStreak = item.bestStreak ?? 0;
+          const isChecked = selectedKeys.has(item.key);
+          
+          let pills = [];
+          if (item.timeCutSeconds > 0)    pills.push('<span class="power-pill pill-time">-5S</span>');
+          if (item.usedDoublePoints)      pills.push('<span class="power-pill pill-x2">x2</span>');
+          if (item.usedOnePointFivePoints)pills.push('<span class="power-pill pill-x1_5">x1.5</span>');
+          if (item.usedShield)            pills.push('<span class="power-pill pill-shield">SHIELD</span>');
+          if (item.usedSpeedBoost)        pills.push('<span class="power-pill pill-speed">BOOST</span>');
+          if (pills.length === 0)         pills.push('<span class="power-pill pill-none">PURE RUN</span>');
+
+          const imageMarkup = playerImage
+            ? `<img src="${playerImage}" alt="${playerName}">`
+            : `<div class="avatar-fallback">${playerName.charAt(0).toUpperCase()}</div>`;
+
+          return `
+            <tr class="${isChecked ? "is-selected" : ""}" data-key="${item.key}">
+              <td>
+                <input type="checkbox" class="select-checkbox row-select"
+                  data-key="${item.key}" ${isChecked ? "checked" : ""}
+                  onchange="toggleRow('${item.key}')">
+              </td>
+              <td>${index + 1}</td>
+              <td>
+                <div class="admin-player-cell">
+                  ${imageMarkup}
+                  <div class="admin-player-info">
+                    <strong>${playerName}</strong>
+                    <span>ID: ${item.key.substring(0, 8)}…</span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge badge-score">${score} pts</span></td>
+              <td><span class="badge badge-time">${Number.isFinite(timeTaken) ? `${timeTaken}s` : "–"}</span></td>
+              <td>${avgReactionTime > 0 ? `${avgReactionTime}ms` : "–"}</td>
+              <td><span class="badge" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text)">Stage ${stage}</span></td>
+              <td><div class="power-pills">${pills.join("")}</div></td>
+              <td><span class="badge badge-streak">🔥 ${bestStreak}</span></td>
+              <td class="admin-actions-cell">
+                <button class="delete-btn" title="Delete ${playerName}" onclick="confirmDeleteOne('${item.key}', '${playerName.replace(/'/g, "\\'")}')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                  </svg>
+                </button>
+              </td>
+            </tr>`;
+        })
+        .join("");
+
+      updateSelectionUI();
+    }
+
+    /* ── Render Orders Table ── */
+    function renderOrdersTable() {
+      const tbody = document.getElementById('ordersTableBody');
+      
+      if (allOrders.length === 0) {
+        tbody.innerHTML = `
+          <tr><td colspan="5">
+            <div class="empty-state-admin">
+              <p>No orders yet</p>
+              <span>When a user submits the form on the promo page, they will appear here.</span>
+            </div>
+          </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = allOrders.map(order => {
+        const dateStr = order.timestamp 
+          ? new Date(order.timestamp).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) 
+          : "Unknown Date";
+          
+        const name = order.name || "Unknown";
+        const email = order.email || "No Email";
+        const phone = order.phone || "No Phone";
+        
+        // Clean phone number for WhatsApp: strip all non-numeric chars except leading '+'
+        let cleanedPhone = phone.replace(/[^\d+]/g, '');
+        if (cleanedPhone.startsWith('00')) {
+          cleanedPhone = '+' + cleanedPhone.substring(2);
+        }
+        
+        // Ensure +60 standard
+        if (cleanedPhone.startsWith('0')) {
+          cleanedPhone = '+60' + cleanedPhone.substring(1);
+        } else if (cleanedPhone.startsWith('60')) {
+          cleanedPhone = '+' + cleanedPhone;
+        } else if (!cleanedPhone.startsWith('+')) {
+          cleanedPhone = '+60' + cleanedPhone;
+        }
+        
+        const waLink = `https://api.whatsapp.com/send?phone=${encodeURIComponent(cleanedPhone)}`;
+
+        return `
+          <tr>
+            <td><strong style="color:var(--text);">${dateStr}</strong></td>
+            <td>
+              <div class="admin-player-cell">
+                <div class="avatar-fallback">${name.charAt(0).toUpperCase()}</div>
+                <strong>${name}</strong>
+              </div>
+            </td>
+            <td><a href="mailto:${email}" style="color:#c8b5ea; text-decoration:none;">${email}</a></td>
+            <td>${phone}</td>
+            <td>
+              <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-whatsapp">
+                <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                Contact
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /* ── Selection handling ── */
+    function toggleRow(key) {
+      if (selectedKeys.has(key)) {
+        selectedKeys.delete(key);
+      } else {
+        selectedKeys.add(key);
+      }
+      renderTable();
+    }
+
+    function toggleSelectAll() {
+      const query = searchInput.value.trim().toLowerCase();
+      const filtered = query
+        ? allResults.filter(r => (r.playerName ?? r.name ?? "").toLowerCase().includes(query))
+        : allResults;
+
+      if (selectAllCheckbox.checked) {
+        filtered.forEach(r => selectedKeys.add(r.key));
+      } else {
+        filtered.forEach(r => selectedKeys.delete(r.key));
+      }
+      renderTable();
+    }
+
+    function updateSelectionUI() {
+      deleteSelectedBtn.disabled = selectedKeys.size === 0;
+      deleteSelectedBtn.textContent = selectedKeys.size > 0
+        ? `Delete selected (${selectedKeys.size})`
+        : "Delete selected";
+    }
+
+    /* ── Delete actions ── */
+    function confirmDeleteOne(key, name) {
+      document.getElementById("modalTitle").textContent = `Delete ${name}?`;
+      document.getElementById("modalText").textContent =
+        `This will permanently remove ${name}'s result from the database. This cannot be undone.`;
+      pendingDeleteAction = () => deleteKeys([key]);
+      openModal();
+    }
+
+    function deleteSelected() {
+      if (selectedKeys.size === 0) return;
+      const count = selectedKeys.size;
+      document.getElementById("modalTitle").textContent = `Delete ${count} result${count > 1 ? "s" : ""}?`;
+      document.getElementById("modalText").textContent =
+        `This will permanently remove ${count} player result${count > 1 ? "s" : ""} from the database. This cannot be undone.`;
+      pendingDeleteAction = () => deleteKeys([...selectedKeys]);
+      openModal();
+    }
+
+    function confirmDeleteAll() {
+      if (allResults.length === 0) {
+        showToast("No results to delete.", "error");
+        return;
+      }
+      const count = allResults.length;
+      document.getElementById("modalTitle").textContent = `Delete ALL ${count} results?`;
+      document.getElementById("modalText").textContent =
+        `This will permanently wipe every player result from the database. This action cannot be undone.`;
+      pendingDeleteAction = () => deleteAllResults();
+      openModal();
+    }
+
+    async function deleteKeys(keys) {
+      closeModal();
+      try {
+        const updates = {};
+        keys.forEach(k => updates[k] = null);
+        await db.ref("gameResults").update(updates);
+        keys.forEach(k => selectedKeys.delete(k));
+        showToast(`Deleted ${keys.length} result${keys.length > 1 ? "s" : ""} successfully.`, "success");
+      } catch (err) {
+        console.error("Delete failed:", err);
+        showToast("Delete failed: " + err.message, "error");
+      }
+    }
+
+    async function deleteAllResults() {
+      closeModal();
+      try {
+        await db.ref("gameResults").remove();
+        selectedKeys.clear();
+        showToast("All results have been deleted.", "success");
+      } catch (err) {
+        console.error("Delete all failed:", err);
+        showToast("Delete failed: " + err.message, "error");
+      }
+    }
+
+    function executePendingDelete() {
+      if (pendingDeleteAction) {
+        pendingDeleteAction();
+        pendingDeleteAction = null;
+      }
+    }
+
+    /* ── Modal ── */
+    function openModal() {
+      document.getElementById("confirmModal").classList.add("is-visible");
+    }
+
+    function closeModal() {
+      document.getElementById("confirmModal").classList.remove("is-visible");
+      pendingDeleteAction = null;
+    }
+
+    /* ── Toast ── */
+    function showToast(message, type = "success") {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.className = `toast toast-${type} is-visible`;
+      setTimeout(() => {
+        toast.classList.remove("is-visible");
+      }, 3200);
+    }
+
+    /* ── Search ── */
+    searchInput.addEventListener("input", () => {
+      renderTable();
+    });
+
+    /* ── Close modal on backdrop click ── */
+    document.getElementById("confirmModal").addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+
+    /* ── Init ── */
+    signInAnonymously()
+      .then(() => {
+        attachListener();
+      })
+      .catch((error) => {
+        console.error("Firebase auth error:", error);
+        adminTableBody.innerHTML = `
+          <tr><td colspan="7">
+            <div class="empty-state-admin">
+              <p>Firebase sign-in failed</p>
+              <span>${error.message}</span>
+            </div>
+          </td></tr>`;
+      });
+  </script>
+</body>
+
+</html>

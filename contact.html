@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartWarm | Order Console</title>
+  <meta name="description" content="Order your SmartWarm LED Console today.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    .contact-hero {
+      text-align: center;
+      padding: 48px 24px;
+      margin-bottom: 24px;
+    }
+    .contact-hero h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      line-height: 1.05;
+      margin-bottom: 16px;
+      background: linear-gradient(180deg, #fff, #ebd4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .contact-hero p {
+      color: var(--muted);
+      max-width: 50ch;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-size: 1.05rem;
+    }
+    
+    .contact-container {
+      max-width: 580px;
+      margin: 0 auto 60px;
+      padding: 40px;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)), var(--surface);
+      backdrop-filter: blur(24px);
+      box-shadow: var(--shadow);
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      color: #f6ddff;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 12px;
+      background: rgba(10, 2, 20, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-family: "Manrope", sans-serif;
+      font-size: 1rem;
+      transition: all 200ms ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: rgba(94, 234, 212, 0.6);
+      box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.15);
+      background: rgba(10, 2, 20, 0.6);
+    }
+
+    .form-group input::placeholder {
+      color: rgba(200, 181, 234, 0.4);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #5eead4, #14b8a6);
+      color: #042f2e;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(20, 184, 166, 0.3);
+      transition: all 200ms ease;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px rgba(20, 184, 166, 0.4);
+      background: linear-gradient(180deg, #ccfbf1, #5eead4);
+    }
+
+    /* Success Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(180deg, #86fff0, #32cdbd);
+      color: #052726;
+      padding: 16px 28px;
+      border-radius: 999px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      box-shadow: 0 16px 40px rgba(6, 1, 14, 0.38);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 400ms cubic-bezier(.2, .8, .2, 1), opacity 400ms ease;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toast.is-visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+      .contact-container {
+        margin: 0 16px 40px;
+        padding: 28px 20px;
+      }
+    }
+  </style>
+</head>
+<body class="page-generic">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">SW</span>
+        <span class="brand-copy">
+          <strong>SmartWarm</strong>
+          <span>Interactive LED Challenge</span>
+        </span>
+      </a>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="mouse-sim.html">Play Demo</a>
+        <a href="result.html">Leaderboard</a>
+        <a href="contact.html">Order Console</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="contact-hero">
+        <h1>Experience the thrill.</h1>
+        <p>Order your SmartWarm LED console today and bring the high-speed reaction challenge to your home.</p>
+      </section>
+
+      <section class="contact-container">
+        <form id="purchaseForm">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required autocomplete="name">
+          </div>
+          
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="e.g. +1 234 567 8900" required autocomplete="tel">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="e.g. hello@example.com" required autocomplete="email">
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">Order Now</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="successToast">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    Thank you! Your order inquiry has been received.
+  </div>
+
+  <script>
+    const { database: db, signInAnonymously } = window.smartWarmFirebase;
+    const form = document.getElementById('purchaseForm');
+    const toast = document.getElementById('successToast');
+    const submitBtn = document.getElementById('submitBtn');
+    let toastTimeout;
+
+    // Secure anonymous login required before pushing
+    signInAnonymously().catch((error) => {
+      console.error("Firebase Auth Error:", error);
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault(); 
+      
+      const nameVal = document.getElementById('name').value.trim();
+      const phoneVal = document.getElementById('phone').value.trim();
+      const emailVal = document.getElementById('email').value.trim();
+
+      if (!nameVal || !phoneVal || !emailVal) return;
+
+      // Disable button briefly to prevent spam
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+
+      // Push to Firebase
+      db.ref("orders").push({
+        name: nameVal,
+        phone: phoneVal,
+        email: emailVal,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      }).then(() => {
+        // Show success toast
+        toast.classList.add('is-visible');
+        form.reset();
+
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+          toast.classList.remove('is-visible');
+        }, 4000);
+
+      }).catch((err) => {
+        console.error("Send failed:", err);
+        alert("Failed to submit order. Please try again.");
+      }).finally(() => {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      });
+    });
+  </script>
+</body>
+</html>

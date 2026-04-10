@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartWarm | LED Indicator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Countdown overlay ── */
+    .countdown-overlay {
+      position: fixed; inset: 0; z-index: 90;
+      display: grid; place-items: center;
+      background: rgba(8, 2, 20, 0.88);
+      backdrop-filter: blur(18px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 220ms ease;
+    }
+    .countdown-overlay.is-visible { opacity: 1; }
+    .countdown-display {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(7rem, 22vw, 16rem);
+      font-weight: 700; line-height: 1;
+      color: #fff8db;
+      text-shadow: 0 0 80px rgba(255,184,77,0.8), 0 0 40px rgba(255,184,77,0.4);
+      animation: countdown-pop 900ms ease forwards;
+    }
+    .countdown-display.is-go {
+      font-size: clamp(4rem, 12vw, 8rem);
+      color: #5eead4;
+      text-shadow: 0 0 80px rgba(94,234,212,0.9), 0 0 40px rgba(94,234,212,0.5);
+    }
+    @keyframes countdown-pop {
+      0%   { transform: scale(1.6); opacity: 0; }
+      28%  { transform: scale(1);   opacity: 1; }
+      72%  { transform: scale(1);   opacity: 1; }
+      100% { transform: scale(0.8); opacity: 0; }
+    }
+
+    /* ── Score floats ── */
+    .score-floats { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
+    .score-float {
+      position: absolute;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(1rem, 2vw, 1.5rem); font-weight: 700;
+      color: #ffd47a;
+      text-shadow: 0 2px 12px rgba(255,184,77,0.6);
+      pointer-events: none;
+      animation: score-float-up 1100ms cubic-bezier(.2,.86,.24,1) forwards;
+    }
+    .score-float.is-bonus { color: #5eead4; text-shadow: 0 2px 12px rgba(94,234,212,0.6); }
+    @keyframes score-float-up {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      55%  { opacity: 1; transform: translateY(-56px) scale(1.12); }
+      100% { opacity: 0; transform: translateY(-110px) scale(0.9); }
+    }
+
+    /* ── Stage progress bar ── */
+    .stage-progress-wrap { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .stage-progress-bar {
+      flex: 1; height: 6px; border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden; position: relative;
+    }
+    .stage-progress-bar::after {
+      content: ""; position: absolute; inset: 0;
+      width: var(--progress, 0%); border-radius: 999px;
+      background: linear-gradient(90deg, #ffb84d, #ff5fe1);
+      transition: width 300ms cubic-bezier(.2,.86,.24,1);
+      box-shadow: 0 0 12px rgba(255,184,77,0.38);
+    }
+    .stage-progress-bar.stage-flash::after {
+      animation: progress-flash 700ms ease-out;
+    }
+    @keyframes progress-flash {
+      0%   { background: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.8); }
+      100% { background: linear-gradient(90deg,#ffb84d,#ff5fe1); }
+    }
+    .stage-progress-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+
+    /* ── Streak milestone badge ── */
+    .streak-milestone {
+      display: block; min-height: 0;
+      font-size: 0.76rem; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+
+    /* ── Live score card accent ── */
+    .streak-card-score strong { transition: color 220ms ease, text-shadow 220ms ease; }
+    .streak-card-score strong.score-bump {
+      color: #ffd47a !important;
+      text-shadow: 0 0 18px rgba(255,184,77,0.7);
+    }
+
+    /* ── Superpower color variants ── */
+    /* timeCut → ice blue */
+    .super-power-overlay.sp-timeCut .super-power-card {
+      background: linear-gradient(180deg, rgba(165,243,252,.97), rgba(56,189,248,.94));
+      color: #0c2a4a; box-shadow: 0 24px 54px rgba(56,189,248,.3);
+    }
+    .super-power-overlay.sp-timeCut .super-power-card p { color: rgba(12,42,74,.78); }
+    /* x1.5 → green */
+    .super-power-overlay.sp-x1_5 .super-power-card {
+      background: linear-gradient(180deg, rgba(187,247,208,.97), rgba(74,222,128,.94));
+      color: #052e16; box-shadow: 0 24px 54px rgba(74,222,128,.3);
+    }
+    .super-power-overlay.sp-x1_5 .super-power-card p { color: rgba(5,46,22,.78); }
+    /* x2 → gold */
+    .super-power-overlay.sp-x2 .super-power-card {
+      background: linear-gradient(180deg, rgba(255,239,150,.98), rgba(251,191,36,.95));
+      color: #3b1a00; box-shadow: 0 24px 54px rgba(251,191,36,.36);
+    }
+    .super-power-overlay.sp-x2 .super-power-card p { color: rgba(59,26,0,.78); }
+    /* shield → cyan */
+    .super-power-overlay.sp-shield .super-power-card {
+      background: linear-gradient(180deg, rgba(207,250,254,.97), rgba(103,232,249,.94));
+      color: #083344; box-shadow: 0 24px 54px rgba(103,232,249,.32);
+    }
+    .super-power-overlay.sp-shield .super-power-card p { color: rgba(8,51,68,.78); }
+    /* speedBoost → electric purple */
+    .super-power-overlay.sp-speed .super-power-card {
+      background: linear-gradient(180deg, rgba(221,214,254,.97), rgba(167,139,250,.94));
+      color: #1e0a4e; box-shadow: 0 24px 54px rgba(167,139,250,.32);
+    }
+    .super-power-overlay.sp-speed .super-power-card p { color: rgba(30,10,78,.78); }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body class="page-led">
+  <div id="hitFlash" class="hit-flash" aria-hidden="true"></div>
+  <div id="impactRings" class="impact-rings" aria-hidden="true">
+    <span class="impact-ring impact-ring-1"></span>
+    <span class="impact-ring impact-ring-2"></span>
+    <span class="impact-ring impact-ring-3"></span>
+  </div>
+  <div id="edgePulse" class="edge-pulse" aria-hidden="true"></div>
+  <div id="endMessageOverlay" class="end-message-overlay" aria-hidden="true">
+    <div id="endMessageCard" class="end-message-card">
+      <span id="endMessageKicker" class="end-message-kicker">Stage complete</span>
+      <strong id="endMessageTitle" class="end-message-title">You're Cool!</strong>
+      <p id="endMessageText" class="end-message-text">
+        Amazing finish. You cleared the whole challenge.
+      </p>
+    </div>
+  </div>
+  <div id="lossHeartOverlay" class="loss-heart-overlay" aria-hidden="true">
+    <div class="heart-container">
+      <svg class="heart-part heart-left" viewBox="0 0 24 24">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+      <svg class="heart-part heart-right" viewBox="0 0 24 24">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+    </div>
+  </div>
+  <div id="levelUpOverlay" class="level-up-overlay" aria-hidden="true">
+    <div id="levelUpCard" class="level-up-card">
+      <span class="level-up-kicker">Stage cleared</span>
+      <strong id="levelUpTitle">Level UP!</strong>
+      <p id="levelUpText">Welcome to Stage 2</p>
+    </div>
+  </div>
+  <div id="superPowerOverlay" class="super-power-overlay" aria-hidden="true">
+    <div id="superPowerCard" class="super-power-card">
+      <span id="superPowerKicker" class="super-power-kicker">Super power received</span>
+      <strong id="superPowerTitle">Super Power Received!</strong>
+      <p id="superPowerText">-5 Second</p>
+    </div>
+  </div>
+  <!-- Countdown overlay -->
+  <div id="countdownOverlay" class="countdown-overlay" aria-hidden="true">
+    <div id="countdownDisplay" class="countdown-display">3</div>
+  </div>
+
+  <div class="streak-overlay" aria-hidden="true">
+    <div id="streakPopup" class="streak-popup">
+      <span class="streak-popup-label">Hot streak</span>
+      <strong id="streakPopupValue">3 HIT STREAK</strong>
+      <span id="streakMilestone" class="streak-milestone"></span>
+    </div>
+    <div id="streakFireBurst" class="streak-fire-burst">
+      <span class="fire-blob fire-blob-1"></span>
+      <span class="fire-blob fire-blob-2"></span>
+      <span class="fire-blob fire-blob-3"></span>
+      <span class="fire-blob fire-blob-4"></span>
+      <span class="fire-spark fire-spark-1"></span>
+      <span class="fire-spark fire-spark-2"></span>
+      <span class="fire-spark fire-spark-3"></span>
+      <span class="fire-spark fire-spark-4"></span>
+      <span class="fire-spark fire-spark-5"></span>
+    </div>
+  </div>
+  <div class="site-shell">
+
+
+    <main class="led-page-layout">
+      <section class="player-profile-header" style="display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: rgba(0,0,0,0.2); border-radius: 16px; margin-bottom: 12px;">
+        <div class="player-avatar-wrap" style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #3b1774; border: 2px solid #ffb84d; flex-shrink: 0; box-shadow: 0 4px 12px rgba(255, 184, 77, 0.3);">
+          <img id="playerProfileImage" src="" alt="" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
+          <div id="playerAvatarFallback" class="player-avatar-fallback" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; color: #fff;">?</div>
+        </div>
+        <div class="player-profile-info" style="flex-grow: 1;">
+          <p class="eyebrow" style="margin-bottom: 4px; font-size: 0.7rem;">Player Screen</p>
+          <h1 id="playerProfileName" style="font-size: 1.8rem; margin-bottom: 4px; line-height: 1;">Waiting for Player...</h1>
+          <p id="playerSummary" style="font-size: 0.95rem; color: #c8b5ea;">Register on the host device to start the challenge.</p>
+        </div>
+        <div class="results-meta" style="text-align: right;">
+          <span id="gameStateBadge" style="display: inline-block; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 999px; margin-bottom: 4px; font-size: 0.85rem;">Waiting for player</span>
+          <br>
+          <span style="font-size: 0.8rem; color: #c8b5ea;">Auto-redirects to leaderboard</span>
+        </div>
+      </section>
+
+      <section class="panel panel-indicator panel-indicator-screen" style="padding: 16px;">
+        <div id="playAura" class="play-aura" aria-hidden="true"></div>
+        <div id="scoreFloats" class="score-floats" aria-hidden="true"></div>
+        <div id="comboParticles" class="combo-particles" aria-hidden="true"></div>
+        <div id="ambientParticles" class="ambient-particles" aria-hidden="true"></div>
+        <div id="speedLines" class="speed-lines" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div id="comboMeter" class="combo-meter" aria-hidden="true">
+          <span class="combo-meter-label">Combo Power</span>
+          <strong id="comboMeterValue">x1</strong>
+        </div>
+        <div id="superPowerReadyCard" class="super-power-ready-card" aria-hidden="true">
+          <span class="super-power-ready-label">Super Card Ready</span>
+          <strong id="superPowerReadyValue">Waiting...</strong>
+          <div id="superPowerStartButton" class="super-power-start-button" aria-hidden="true">START</div>
+        </div>
+        <div class="indicator-head">
+          <div class="indicator-head-main">
+            <span class="live-pill">
+              <span class="live-dot"></span>
+              IoT live target
+            </span>
+            <strong id="heroLedLabel" class="indicator-title">Waiting for LED update</strong>
+          </div>
+          <div class="streak-strip">
+            <article class="streak-card">
+              <span>Time</span>
+              <strong id="timerValue">0.0s</strong>
+            </article>
+            <article class="streak-card">
+              <span>Current streak</span>
+              <strong id="currentStreakValue">0</strong>
+            </article>
+            <article class="streak-card">
+              <span>Best streak</span>
+              <strong id="bestStreakValue">0</strong>
+            </article>
+            <article class="streak-card streak-card-score">
+              <span>Score</span>
+              <strong id="liveScoreValue">0</strong>
+            </article>
+          </div>
+          <!-- Stage progress bar -->
+          <div class="stage-progress-wrap">
+            <div id="stageProgressBar" class="stage-progress-bar"></div>
+            <span id="stageProgressLabel" class="stage-progress-label">Stage 1 · 0/5</span>
+          </div>
+        </div>
+
+        <div class="led-stage-wrap">
+
+          <div class="led-stage-card led-stage-card-large">
+            <div class="led-grid led-grid-large">
+              <button type="button" id="led0" class="led-tile led-tile-large">
+                <span>01</span>
+                <strong>Top Left</strong>
+              </button>
+              <button type="button" id="led1" class="led-tile led-tile-large">
+                <span>02</span>
+                <strong>Top Right</strong>
+              </button>
+              <button type="button" id="led2" class="led-tile led-tile-large">
+                <span>03</span>
+                <strong>Bottom Left</strong>
+              </button>
+              <button type="button" id="led3" class="led-tile led-tile-large">
+                <span>04</span>
+                <strong>Bottom Right</strong>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p id="ledPageStatus" class="status-message" aria-live="polite">
+          Waiting for the game controller to start the next round.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const { database, signInAnonymously } = window.smartWarmFirebase;
+
+    const ledNames = ["Top Left", "Top Right", "Bottom Left", "Bottom Right"];
+    const heroLedLabel = document.getElementById("heroLedLabel");
+    const currentStreakValue = document.getElementById("currentStreakValue");
+    const bestStreakValue = document.getElementById("bestStreakValue");
+    const playerSummary = document.getElementById("playerSummary");
+    const gameStateBadge = document.getElementById("gameStateBadge");
+    const ledPageStatus = document.getElementById("ledPageStatus");
+    const hitFlash = document.getElementById("hitFlash");
+    const impactRings = document.getElementById("impactRings");
+    const edgePulse = document.getElementById("edgePulse");
+    const endMessageOverlay = document.getElementById("endMessageOverlay");
+    const endMessageCard = document.getElementById("endMessageCard");
+    const endMessageKicker = document.getElementById("endMessageKicker");
+    const endMessageTitle = document.getElementById("endMessageTitle");
+    const endMessageText = document.getElementById("endMessageText");
+    const levelUpOverlay = document.getElementById("levelUpOverlay");
+    const levelUpCard = document.getElementById("levelUpCard");
+    const levelUpText = document.getElementById("levelUpText");
+    const superPowerOverlay = document.getElementById("superPowerOverlay");
+    const superPowerCard = document.getElementById("superPowerCard");
+    const superPowerKicker = document.getElementById("superPowerKicker");
+    const superPowerTitle = document.getElementById("superPowerTitle");
+    const superPowerText = document.getElementById("superPowerText");
+    const streakPopup = document.getElementById("streakPopup");
+    const streakPopupValue = document.getElementById("streakPopupValue");
+    const streakFireBurst = document.getElementById("streakFireBurst");
+    const playAura = document.getElementById("playAura");
+    const comboParticles = document.getElementById("comboParticles");
+    const ambientParticles = document.getElementById("ambientParticles");
+    const speedLines = document.getElementById("speedLines");
+    const comboMeter = document.getElementById("comboMeter");
+    const comboMeterValue = document.getElementById("comboMeterValue");
+    const superPowerReadyCard = document.getElementById("superPowerReadyCard");
+    const superPowerReadyValue = document.getElementById("superPowerReadyValue");
+    const superPowerStartButton = document.getElementById("superPowerStartButton");
+    const timerValue = document.getElementById("timerValue");
+
+    // New elements
+    const liveScoreValue     = document.getElementById("liveScoreValue");
+    const scoreFloats        = document.getElementById("scoreFloats");
+    const stageProgressBar   = document.getElementById("stageProgressBar");
+    const stageProgressLabel = document.getElementById("stageProgressLabel");
+    const countdownOverlay   = document.getElementById("countdownOverlay");
+    const countdownDisplay   = document.getElementById("countdownDisplay");
+    const streakMilestone    = document.getElementById("streakMilestone");
+
+    let hasRedirectedToResults = false;
+    let lastStreakValue = 0;
+    let lastLedIndex = -1;
+    let lastStatusValue = "waiting";
+    let streakEffectTimeout;
+    let fireEffectTimeout;
+    let shakeTimeout;
+    let flashTimeout;
+    let particleCleanupTimeout;
+    let endMessageTimeout;
+    let comboMeterTimeout;
+    let ambientParticleTimer;
+    let lastStageValue = 0;
+    let lastStageShown = 0;
+    let latestLevelEventStage = 0;
+    let lastLevelEvent = 0;
+    let levelUpTimeout;
+    let lastSuperPowerEvent = 0;
+    let latestSuperPowerTitle = "";
+    let latestSuperPowerDetail = "";
+    let latestSuperPowerState = "none";
+    let superPowerTimeout;
+    let roundTimerInterval;
+    let roundStartedAt = 0;
+    let roundTimeBonusMs = 0;
+    let timerIsActive = false;
+    let lastPublishedTime = -1;
+    let timerSliceTimeout;
+    let timerFreezeTimeout;
+    let superPowerReady = false;
+    let lastScore = 0;
+    let lastCountdownEvent = 0;
+    let countdownTimeouts = [];
+    const STAGE_TARGETS = [5, 10, 15];
+    const MILESTONE_LABELS = { 3: "🔥 On Fire", 6: "⚡ Lightning", 9: "💥 Unstoppable", 12: "🌟 Legendary", 15: "👑 Godlike" };
+
+    function renderRoundTimer(elapsedMs) {
+      const safeElapsed = Math.max(0, elapsedMs);
+
+      timerValue.textContent = `${(safeElapsed / 1000).toFixed(1)}s`;
+    }
+
+
+
+    function stopRoundTimer({ reset = false } = {}) {
+      clearInterval(roundTimerInterval);
+      roundTimerInterval = null;
+      timerIsActive = false;
+
+      if (reset) {
+        roundStartedAt = 0;
+        roundTimeBonusMs = 0;
+        lastPublishedTime = 0;
+        database.ref("gameControl/timeTaken").set(0).catch(handleError);
+        renderRoundTimer(0);
+      }
+    }
+
+    function updateRoundTimer() {
+      if (!timerIsActive || !roundStartedAt) {
+        return;
+      }
+
+      const elapsedMs = Math.max(0, Date.now() - roundStartedAt - roundTimeBonusMs);
+      const elapsedSeconds = Number((elapsedMs / 1000).toFixed(1));
+
+      renderRoundTimer(elapsedMs);
+
+      if (elapsedSeconds !== lastPublishedTime) {
+        lastPublishedTime = elapsedSeconds;
+        database.ref("gameControl/timeTaken").set(elapsedSeconds).catch(handleError);
+      }
+    }
+
+    function startRoundTimer() {
+      roundStartedAt = Date.now();
+      roundTimeBonusMs = 0;
+      timerIsActive = true;
+      lastPublishedTime = -1;
+      renderRoundTimer(0);
+      clearInterval(roundTimerInterval);
+      roundTimerInterval = setInterval(updateRoundTimer, 100);
+      updateRoundTimer();
+    }
+
+    function addRoundTimeBonus(extraMs) {
+      if (!timerIsActive || extraMs <= 0) {
+        return;
+      }
+
+      roundTimeBonusMs += extraMs;
+      updateRoundTimer();
+    }
+
+    function setPageStatus(message, type) {
+      ledPageStatus.textContent = message;
+      ledPageStatus.dataset.state = type || "default";
+    }
+
+    function clearActiveLed() {
+      for (let i = 0; i < 4; i += 1) {
+        document.getElementById(`led${i}`).classList.remove("active");
+      }
+    }
+
+    function redirectToResults(delay = 1200) {
+      if (hasRedirectedToResults) {
+        return;
+      }
+
+      hasRedirectedToResults = true;
+      setPageStatus("Game finished. Opening leaderboard...", "success");
+
+      setTimeout(() => {
+        window.location.href = "result.html";
+      }, delay);
+    }
+
+    function clearEffects() {
+      streakPopup.classList.remove("is-visible");
+      streakFireBurst.classList.remove("is-active");
+      impactRings.classList.remove("is-active");
+      edgePulse.classList.remove("is-active");
+      document.body.classList.remove("screen-shake");
+      document.body.classList.remove("hit-flash-active");
+      playAura.classList.remove("is-live");
+      speedLines.classList.remove("is-live");
+      comboMeter.classList.remove("is-visible", "is-max");
+      comboMeterValue.textContent = "x1";
+      comboParticles.innerHTML = "";
+      ambientParticles.innerHTML = "";
+      scoreFloats.innerHTML = "";
+      levelUpOverlay.classList.remove("is-visible");
+      levelUpCard.classList.remove("is-visible");
+      superPowerOverlay.classList.remove("is-visible", "is-activated", ...SP_CLASSES);
+      superPowerCard.classList.remove("is-visible");
+      endMessageOverlay.classList.remove("is-visible", "is-win", "is-loss");
+      endMessageCard.classList.remove("is-visible");
+      countdownOverlay.classList.remove("is-visible");
+      countdownTimeouts.forEach(clearTimeout);
+      countdownTimeouts = [];
+      stageProgressBar.style.setProperty("--progress", "0%");
+      stageProgressLabel.textContent = "Stage 1 · 0/5";
+      streakMilestone.textContent = "";
+      liveScoreValue.textContent = "0";
+      lastScore = 0;
+      const lossHeart = document.getElementById("lossHeartOverlay");
+      if (lossHeart) lossHeart.classList.remove("is-visible");
+      document.body.classList.remove("on-fire", "loss-shake", "screen-shake");
+      clearInterval(ambientParticleTimer);
+    }
+
+    function updateSuperPowerReadyCard(detail, state, ready) {
+      const hasReadyPower = Boolean(ready) && state !== "activated";
+      superPowerReady = hasReadyPower;
+      superPowerReadyCard.classList.toggle("is-visible", hasReadyPower);
+      superPowerReadyCard.classList.toggle("is-activated", state === "activated");
+      superPowerStartButton.classList.toggle("is-blinking", hasReadyPower);
+      superPowerStartButton.setAttribute("aria-hidden", hasReadyPower ? "false" : "true");
+      if (!hasReadyPower) { superPowerReadyValue.textContent = "Waiting..."; return; }
+      if (/freeze/i.test(detail))                              superPowerReadyValue.textContent = "Time Freeze";
+      else if (/5\s*second/i.test(detail))                     superPowerReadyValue.textContent = "-5 Second";
+      else if (/x1\.5/i.test(detail) || /1\.5/i.test(detail)) superPowerReadyValue.textContent = "x1.5 Score";
+      else if (/x2/i.test(detail))                             superPowerReadyValue.textContent = "x2 Score";
+      else if (/shield/i.test(detail) || /miss/i.test(detail)) superPowerReadyValue.textContent = "Perfect Shield";
+      else if (/speed/i.test(detail) || /boost/i.test(detail)) superPowerReadyValue.textContent = "Speed Boost";
+      else superPowerReadyValue.textContent = detail || "Ready";
+    }
+
+    function showEndMessage(type) {
+      clearTimeout(endMessageTimeout);
+
+      if (type === "win") {
+        endMessageKicker.textContent = "All stages cleared";
+        endMessageTitle.textContent = "You're Cool!";
+        endMessageText.textContent = "Amazing finish. You cleared all 3 stages like a champion.";
+        endMessageOverlay.classList.remove("is-loss");
+        endMessageOverlay.classList.add("is-win");
+      } else {
+        endMessageKicker.textContent = "Nice try";
+        endMessageTitle.textContent = "You Did Great!";
+        endMessageText.textContent = "Strong effort. Get ready for the next round and go again.";
+        endMessageOverlay.classList.remove("is-win");
+        endMessageOverlay.classList.add("is-loss");
+      }
+
+      endMessageOverlay.classList.add("is-visible");
+      endMessageCard.classList.remove("is-visible");
+      void endMessageCard.offsetWidth;
+      endMessageCard.classList.add("is-visible");
+      
+      if (type === "win") {
+        document.body.classList.add("screen-shake");
+      } else {
+        document.body.classList.add("loss-shake");
+        const lossHeart = document.getElementById("lossHeartOverlay");
+        if (lossHeart) {
+          lossHeart.classList.remove("is-visible");
+          void lossHeart.offsetWidth;
+          lossHeart.classList.add("is-visible");
+        }
+      }
+      
+      triggerHitFlash();
+      spawnComboParticles(type === "win" ? 10 : 6);
+
+      clearTimeout(shakeTimeout);
+      shakeTimeout = setTimeout(() => {
+        document.body.classList.remove("screen-shake", "loss-shake");
+      }, type === "win" ? 680 : 1200);
+
+      endMessageTimeout = setTimeout(() => {
+        endMessageOverlay.classList.remove("is-visible", "is-win", "is-loss");
+        endMessageCard.classList.remove("is-visible");
+        const lossHeart = document.getElementById("lossHeartOverlay");
+        if (lossHeart) lossHeart.classList.remove("is-visible");
+      }, 2400);
+    }
+
+    function showLevelUp(stage) {
+      const title = stage === 1 ? "Stage 1!" : "Level UP!";
+      const text = stage === 1
+        ? "Stage 1 is live. Let's go!"
+        : `Welcome to Stage ${stage}`;
+
+      document.getElementById("levelUpTitle").textContent = title;
+      levelUpText.textContent = stage === 1
+        ? "Stage 1 is live. Let's go!"
+        : `Welcome to Stage ${stage}`;
+      levelUpOverlay.classList.add("is-visible");
+      levelUpCard.classList.remove("is-visible");
+      void levelUpCard.offsetWidth;
+      levelUpCard.classList.add("is-visible");
+      streakFireBurst.classList.remove("is-active");
+      void streakFireBurst.offsetWidth;
+      streakFireBurst.classList.add("is-active");
+      document.body.classList.add("screen-shake");
+      triggerHitFlash();
+      spawnComboParticles(stage === 1 ? 7 : 10);
+      updateComboMeter(Math.max(stage * 2, 2));
+
+      clearTimeout(shakeTimeout);
+      shakeTimeout = setTimeout(() => {
+        document.body.classList.remove("screen-shake");
+      }, 520);
+
+      clearTimeout(fireEffectTimeout);
+      fireEffectTimeout = setTimeout(() => {
+        streakFireBurst.classList.remove("is-active");
+      }, 1100);
+
+      clearTimeout(levelUpTimeout);
+      levelUpTimeout = setTimeout(() => {
+        levelUpOverlay.classList.remove("is-visible");
+        levelUpCard.classList.remove("is-visible");
+      }, 1700);
+    }
+
+    // ── Superpower color variant classes ──
+    const SP_CLASSES = ["sp-timeCut","sp-x2","sp-x1_5","sp-shield","sp-speed"];
+    function setSuperPowerStyle(detail) {
+      SP_CLASSES.forEach(c => superPowerOverlay.classList.remove(c));
+      if (!detail) return;
+      if (/5[\s\-]*second/i.test(detail))                       superPowerOverlay.classList.add("sp-timeCut");
+      else if (/x2/i.test(detail) || /doubled/i.test(detail))   superPowerOverlay.classList.add("sp-x2");
+      else if (/x1\.5/i.test(detail) || /1\.5/i.test(detail))  superPowerOverlay.classList.add("sp-x1_5");
+      else if (/shield/i.test(detail) || /miss/i.test(detail))  superPowerOverlay.classList.add("sp-shield");
+      else if (/speed/i.test(detail) || /boost/i.test(detail))  superPowerOverlay.classList.add("sp-speed");
+    }
+
+    // ── Score float spawner ──
+    function spawnScoreFloat(amount, isBonus) {
+      const el = document.createElement("span");
+      el.className = "score-float" + (isBonus ? " is-bonus" : "");
+      el.textContent = "+" + amount;
+      el.style.left = `${12 + Math.random() * 76}%`;
+      el.style.bottom = `${28 + Math.random() * 32}%`;
+      scoreFloats.appendChild(el);
+      setTimeout(() => el.remove(), 1200);
+    }
+
+    // ── Animate live score counter ──
+    function animateScoreChange(newScore) {
+      const diff = newScore - lastScore;
+      if (diff > 0 && lastScore >= 0) {
+        spawnScoreFloat(diff, diff > 300);
+        const strong = liveScoreValue;
+        strong.classList.remove("score-bump");
+        void strong.offsetWidth;
+        strong.classList.add("score-bump");
+        setTimeout(() => strong.classList.remove("score-bump"), 480);
+      }
+      liveScoreValue.textContent = newScore;
+      lastScore = newScore;
+    }
+
+    // ── Stage progress bar ──
+    function updateStageProgress(phase, stage) {
+      const target = STAGE_TARGETS[Math.min(stage - 1, 2)];
+      const pct = Math.min(100, Math.round((phase / target) * 100));
+      stageProgressBar.style.setProperty("--progress", `${pct}%`);
+      stageProgressLabel.textContent = `Stage ${stage} · ${phase}/${target}`;
+    }
+
+    // ── Countdown overlay ──
+    function showCountdown() {
+      countdownTimeouts.forEach(clearTimeout);
+      countdownTimeouts = [];
+      countdownOverlay.classList.add("is-visible");
+      const steps = [
+        { text: "3", delay: 0 },
+        { text: "2", delay: 700 },
+        { text: "1", delay: 1400 },
+        { text: "GO!", delay: 2100, isGo: true },
+      ];
+      steps.forEach(({ text, delay, isGo }) => {
+        countdownTimeouts.push(setTimeout(() => {
+          countdownDisplay.textContent = text;
+          countdownDisplay.className = "countdown-display" + (isGo ? " is-go" : "");
+          // re-trigger animation
+          countdownDisplay.style.animation = "none";
+          void countdownDisplay.offsetWidth;
+          countdownDisplay.style.animation = "countdown-pop 700ms ease forwards";
+        }, delay));
+      });
+      countdownTimeouts.push(setTimeout(() => {
+        countdownOverlay.classList.remove("is-visible");
+      }, 3000));
+    }
+
+    function showSuperPowerOverlay(title, detail, state) {
+      setSuperPowerStyle(detail);
+
+      let formattedDetail = detail || "-5 Second";
+      if (/x1\.5/i.test(detail) || /1\.5/i.test(detail))  formattedDetail = "x1.5 Score";
+      else if (/x2/i.test(detail) && !/1\.5/i.test(detail)) formattedDetail = "x2 Score";
+      else if (/freeze/i.test(detail))                      formattedDetail = "Time Freeze";
+      else if (/shield/i.test(detail) || /miss/i.test(detail)) formattedDetail = "Perfect Shield";
+      else if (/speed/i.test(detail) || /boost/i.test(detail)) formattedDetail = "Speed Boost";
+
+      superPowerTitle.textContent = title || "Super Power!";
+      superPowerText.textContent = formattedDetail;
+      superPowerKicker.textContent = state === "activated" ? "Power activated" : "Super power received";
+
+      superPowerOverlay.classList.toggle("is-activated", state === "activated");
+      superPowerOverlay.classList.add("is-visible");
+      superPowerCard.classList.remove("is-visible");
+      void superPowerCard.offsetWidth;
+      superPowerCard.classList.add("is-visible");
+
+      streakFireBurst.classList.remove("is-active");
+      void streakFireBurst.offsetWidth;
+      streakFireBurst.classList.add("is-active");
+
+      document.body.classList.add("screen-shake");
+      triggerHitFlash();
+      spawnComboParticles(state === "activated" ? 9 : 7);
+
+      clearTimeout(shakeTimeout);
+      shakeTimeout = setTimeout(() => document.body.classList.remove("screen-shake"), 520);
+
+      clearTimeout(fireEffectTimeout);
+      fireEffectTimeout = setTimeout(() => streakFireBurst.classList.remove("is-active"), 900);
+
+      clearTimeout(superPowerTimeout);
+      superPowerTimeout = setTimeout(() => {
+        superPowerOverlay.classList.remove("is-visible", "is-activated");
+        superPowerCard.classList.remove("is-visible");
+        SP_CLASSES.forEach(c => superPowerOverlay.classList.remove(c));
+      }, 1900);
+    }
+
+    function handleStageUpdate(stage) {
+      if (!Number.isFinite(stage) || stage < 1) {
+        return;
+      }
+
+      lastStageValue = stage;
+
+      if (stage === lastStageShown) {
+        return;
+      }
+
+      lastStageShown = stage;
+      showLevelUp(stage);
+    }
+
+    function triggerHitFlash() {
+      document.body.classList.remove("hit-flash-active");
+      impactRings.classList.remove("is-active");
+      edgePulse.classList.remove("is-active");
+      void hitFlash.offsetWidth;
+      document.body.classList.add("hit-flash-active");
+      impactRings.classList.add("is-active");
+      edgePulse.classList.add("is-active");
+      clearTimeout(flashTimeout);
+      flashTimeout = setTimeout(() => {
+        document.body.classList.remove("hit-flash-active");
+        impactRings.classList.remove("is-active");
+        edgePulse.classList.remove("is-active");
+      }, 320);
+    }
+
+    function spawnComboParticles(strength) {
+      const count = Math.min(12, 5 + strength);
+      comboParticles.innerHTML = "";
+
+      for (let i = 0; i < count; i += 1) {
+        const particle = document.createElement("span");
+        particle.className = "combo-particle";
+        particle.style.left = `${8 + Math.random() * 84}%`;
+        particle.style.bottom = `${16 + Math.random() * 28}%`;
+        particle.style.setProperty("--drift-x", `${(Math.random() * 140 - 70).toFixed(0)}px`);
+        particle.style.setProperty("--drift-y", `${(110 + Math.random() * 100).toFixed(0)}px`);
+        particle.style.animationDelay = `${(Math.random() * 0.16).toFixed(2)}s`;
+        comboParticles.appendChild(particle);
+      }
+
+      clearTimeout(particleCleanupTimeout);
+      particleCleanupTimeout = setTimeout(() => {
+        comboParticles.innerHTML = "";
+      }, 1100);
+    }
+
+    function spawnAmbientParticle() {
+      if (!playAura.classList.contains("is-live")) {
+        return;
+      }
+
+      const particle = document.createElement("span");
+      particle.className = "ambient-particle";
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.bottom = `${6 + Math.random() * 24}%`;
+      particle.style.setProperty("--ambient-x", `${(Math.random() * 120 - 60).toFixed(0)}px`);
+      particle.style.setProperty("--ambient-y", `${(90 + Math.random() * 120).toFixed(0)}px`);
+      particle.style.animationDuration = `${(2.2 + Math.random() * 1.4).toFixed(2)}s`;
+      ambientParticles.appendChild(particle);
+
+      setTimeout(() => {
+        particle.remove();
+      }, 3800);
+    }
+
+    function startAmbientParticles() {
+      clearInterval(ambientParticleTimer);
+      ambientParticleTimer = setInterval(spawnAmbientParticle, 180);
+    }
+
+    function updateComboMeter(streak) {
+      const multiplier = Math.max(1, Math.min(9, streak));
+      comboMeterValue.textContent = `x${multiplier}`;
+      comboMeter.classList.add("is-visible");
+      comboMeter.classList.toggle("is-max", multiplier >= 6);
+
+      clearTimeout(comboMeterTimeout);
+      comboMeterTimeout = setTimeout(() => {
+        if (lastStreakValue === 0) {
+          comboMeter.classList.remove("is-visible", "is-max");
+          comboMeterValue.textContent = "x1";
+        }
+      }, 1800);
+    }
+
+    function triggerStreakEffect(streak) {
+      if (streak < 3) return;
+
+      const milestones = [15, 12, 9, 6, 3];
+      const label = milestones.find(m => streak >= m);
+      const milestoneText = label ? MILESTONE_LABELS[label] : "";
+
+      streakMilestone.textContent = milestoneText;
+      streakPopupValue.textContent = `${streak} HIT STREAK`;
+      streakPopup.classList.remove("is-visible");
+      streakFireBurst.classList.remove("is-active");
+      document.body.classList.remove("screen-shake");
+      void streakPopup.offsetWidth;
+
+      streakPopup.classList.add("is-visible");
+      streakFireBurst.classList.add("is-active");
+      document.body.classList.add("screen-shake");
+      triggerHitFlash();
+      spawnComboParticles(streak);
+      updateComboMeter(streak);
+
+      clearTimeout(streakEffectTimeout);
+      clearTimeout(fireEffectTimeout);
+      clearTimeout(shakeTimeout);
+
+      shakeTimeout = setTimeout(() => document.body.classList.remove("screen-shake"), 520);
+      fireEffectTimeout = setTimeout(() => streakFireBurst.classList.remove("is-active"), 900);
+      streakEffectTimeout = setTimeout(() => {
+        streakPopup.classList.remove("is-visible");
+        streakMilestone.textContent = "";
+      }, 1500);
+    }
+
+    function attachListeners() {
+      database.ref("gameControl").on("value", (snapshot) => {
+        const data = snapshot.val();
+
+        if (!data || !data.playerName) {
+          document.getElementById("playerSummary").textContent = "Waiting for the next player registration before the round begins.";
+          document.getElementById("playerProfileName").textContent = "Waiting for Player...";
+          document.getElementById("playerProfileImage").style.display = "none";
+          document.getElementById("playerAvatarFallback").style.display = "flex";
+          document.getElementById("playerAvatarFallback").textContent = "?";
+          return;
+        }
+
+        const status = data.status || "ready";
+        document.getElementById("playerSummary").textContent = "Ready for the SmartWarm challenge.";
+        document.getElementById("playerProfileName").textContent = data.playerName;
+        
+        if (data.playerImage) {
+          document.getElementById("playerProfileImage").src = data.playerImage;
+          document.getElementById("playerProfileImage").style.display = "block";
+          document.getElementById("playerAvatarFallback").style.display = "none";
+        } else {
+          document.getElementById("playerProfileImage").style.display = "none";
+          document.getElementById("playerAvatarFallback").style.display = "flex";
+          document.getElementById("playerAvatarFallback").textContent = data.playerName.charAt(0).toUpperCase();
+        }
+        
+        gameStateBadge.textContent = `Player status: ${status}`;
+      }, handleError);
+
+      database.ref("gameStatus/currentLED").on("value", (snapshot) => {
+        const ledIndex = snapshot.val();
+        clearActiveLed();
+
+        if (ledIndex !== null && ledIndex >= 0 && ledIndex < ledNames.length) {
+          document.getElementById(`led${ledIndex}`).classList.add("active");
+          heroLedLabel.textContent = `${ledNames[ledIndex]} is active`;
+
+          if (lastLedIndex !== -1 && lastLedIndex !== ledIndex) {
+            triggerHitFlash();
+            spawnComboParticles(Math.max(lastStreakValue, 1));
+          }
+
+          lastLedIndex = ledIndex;
+        } else {
+          heroLedLabel.textContent = "Waiting for LED update";
+          lastLedIndex = -1;
+        }
+      }, handleError);
+
+      database.ref("gameStatus/streak").on("value", (snapshot) => {
+        const streak = Number(snapshot.val() ?? 0);
+        currentStreakValue.textContent = streak;
+
+        if (streak > lastStreakValue) {
+          triggerStreakEffect(streak);
+        } else if (streak === 0 && lastStreakValue !== 0) {
+          clearEffects();
+        } else if (streak > 0) {
+          updateComboMeter(streak);
+        }
+
+        document.body.classList.toggle("on-fire", streak >= 3);
+
+        lastStreakValue = streak;
+      }, handleError);
+
+      database.ref("gameStatus/bestStreak").on("value", (snapshot) => {
+        bestStreakValue.textContent = snapshot.val() ?? 0;
+      }, handleError);
+
+      database.ref("gameControl/timeTaken").on("value", (snapshot) => {
+        const timeTaken = Number(snapshot.val() ?? 0);
+
+        if (!timerIsActive && Number.isFinite(timeTaken)) {
+          renderRoundTimer(timeTaken * 1000);
+        }
+      }, handleError);
+
+      database.ref("gameStatus/stage").on("value", (snapshot) => {
+        const stage = Number(snapshot.val() ?? 0);
+        lastStageValue = stage;
+      }, handleError);
+
+      database.ref("gameControl/stage").on("value", (snapshot) => {
+        const stage = Number(snapshot.val() ?? 0);
+        lastStageValue = Math.max(lastStageValue, stage);
+      }, handleError);
+
+      database.ref("gameStatus/levelEventStage").on("value", (snapshot) => {
+        latestLevelEventStage = Number(snapshot.val() ?? 0);
+      }, handleError);
+
+      database.ref("gameStatus/levelEvent").on("value", (snapshot) => {
+        const levelEvent = Number(snapshot.val() ?? 0);
+
+        if (!levelEvent || levelEvent === lastLevelEvent) {
+          return;
+        }
+
+        lastLevelEvent = levelEvent;
+        handleStageUpdate(latestLevelEventStage || lastStageValue || 1);
+      }, handleError);
+
+      database.ref("gameStatus/superPowerTitle").on("value", (snapshot) => {
+        latestSuperPowerTitle = snapshot.val() || "";
+      }, handleError);
+
+      database.ref("gameStatus/superPowerDetail").on("value", (snapshot) => {
+        latestSuperPowerDetail = snapshot.val() || "";
+      }, handleError);
+
+      database.ref("gameStatus/superPowerState").on("value", (snapshot) => {
+        latestSuperPowerState = snapshot.val() || "none";
+      }, handleError);
+
+      database.ref("gameStatus/superPowerReady").on("value", (snapshot) => {
+        const ready = Boolean(snapshot.val());
+        updateSuperPowerReadyCard(latestSuperPowerDetail, latestSuperPowerState, ready);
+      }, handleError);
+
+      database.ref("gameStatus/superPowerEvent").on("value", (snapshot) => {
+        const superPowerEvent = Number(snapshot.val() ?? 0);
+
+        if (!superPowerEvent || superPowerEvent === lastSuperPowerEvent) {
+          return;
+        }
+
+        lastSuperPowerEvent = superPowerEvent;
+        database.ref("gameStatus").once("value")
+          .then((gameStatusSnapshot) => {
+            const gameStatus = gameStatusSnapshot.val() || {};
+            const title = gameStatus.superPowerTitle || latestSuperPowerTitle;
+            const detail = gameStatus.superPowerDetail || latestSuperPowerDetail;
+            const state = gameStatus.superPowerState || latestSuperPowerState || "none";
+            const ready = Boolean(gameStatus.superPowerReady);
+
+            latestSuperPowerTitle = title;
+            latestSuperPowerDetail = detail;
+            latestSuperPowerState = state;
+            updateSuperPowerReadyCard(detail, state, ready);
+
+            if (state === "activated") {
+              if (/5\s*second/i.test(detail)) {
+                addRoundTimeBonus(5000);
+              }
+            }
+
+            showSuperPowerOverlay(title, detail, state);
+          })
+          .catch(handleError);
+      }, handleError);
+
+      database.ref("gameStatus/status").on("value", (snapshot) => {
+        const status = snapshot.val() || "waiting";
+        gameStateBadge.textContent = `Game status: ${status}`;
+
+        if (status === "ready" || status === "countdown") {
+          setPageStatus("Player registered. Waiting for the host to start the round.", "success");
+          clearActiveLed();
+          heroLedLabel.textContent = "Waiting for LED update";
+          lastStreakValue = 0;
+          lastLedIndex = -1;
+          lastStageValue = 0;
+          lastStageShown = 0;
+          latestLevelEventStage = 0;
+          lastLevelEvent = 0;
+          lastSuperPowerEvent = 0;
+          latestSuperPowerTitle = "";
+          latestSuperPowerDetail = "";
+          latestSuperPowerState = "none";
+          currentStreakValue.textContent = "0";
+          clearEffects();
+          stopRoundTimer({ reset: true });
+          lastStatusValue = status;
+          return;
+        }
+
+        if (status === "playing") {
+          // Hide countdown if still visible
+          countdownOverlay.classList.remove("is-visible");
+          countdownTimeouts.forEach(clearTimeout);
+          countdownTimeouts = [];
+          setPageStatus("Game in progress. Follow the highlighted LED.", "loading");
+          playAura.classList.add("is-live");
+          speedLines.classList.add("is-live");
+          startAmbientParticles();
+          if (lastStatusValue !== "playing") {
+            startRoundTimer();
+          }
+          lastStatusValue = status;
+          return;
+        }
+
+        if (status === "win" || status === "gameover" || status === "completed") {
+          clearEffects();
+          stopRoundTimer();
+          if (status === "win" || status === "completed") {
+            showEndMessage("win");
+          } else {
+            showEndMessage("loss");
+          }
+          redirectToResults(2600);
+          lastStatusValue = status;
+          return;
+        }
+
+        playAura.classList.remove("is-live");
+        speedLines.classList.remove("is-live");
+        stopRoundTimer({ reset: true });
+        setPageStatus("Waiting for the game controller to start the next round.", "default");
+        lastStatusValue = status;
+      }, handleError);
+      // ── NEW: Live score listener ──
+      database.ref("gameStatus/score").on("value", (snapshot) => {
+        const score = Number(snapshot.val() ?? 0);
+        animateScoreChange(score);
+      }, handleError);
+
+      // ── NEW: Stage phase progress listener ──
+      database.ref("gameStatus/currentPhase").on("value", (snapshot) => {
+        const phase = Number(snapshot.val() ?? 0);
+        const stage = Math.max(1, lastStageValue || 1);
+        updateStageProgress(phase, stage);
+      }, handleError);
+
+      // ── NEW: Countdown event listener ──
+      database.ref("gameStatus/countdownEvent").on("value", (snapshot) => {
+        const evt = Number(snapshot.val() ?? 0);
+        if (!evt || evt === lastCountdownEvent) return;
+        lastCountdownEvent = evt;
+        showCountdown();
+      }, handleError);
+    }
+
+    function handleError(error) {
+      console.error("Firebase connection error:", error);
+      setPageStatus("Firebase connection failed. Check auth or database rules.", "error");
+    }
+
+    signInAnonymously()
+      .then(() => {
+        setPageStatus("Connected to Firebase. Waiting for game state...", "success");
+        attachListeners();
+      })
+      .catch((error) => {
+        console.error("Firebase auth error:", error);
+        setPageStatus("Firebase sign-in failed. Check the project's Authentication settings.", "error");
+      });
+
+    // Make the body fit nicely to maximize game UI
+    document.body.style.display = "flex";
+    document.body.style.flexDirection = "column";
+    document.querySelector(".site-shell").style.flexGrow = "1";
+    document.querySelector(".site-shell").style.display = "flex";
+    document.querySelector(".site-shell").style.flexDirection = "column";
+    document.querySelector(".led-page-layout").style.flexGrow = "1";
+    document.querySelector(".led-page-layout").style.display = "flex";
+    document.querySelector(".led-page-layout").style.flexDirection = "column";
+    document.querySelector(".panel-indicator-screen").style.flexGrow = "1";
+    document.querySelector(".panel-indicator-screen").style.display = "flex";
+    document.querySelector(".panel-indicator-screen").style.flexDirection = "column";
+    document.querySelector(".led-stage-wrap").style.flexGrow = "1";
+    document.querySelector(".led-stage-card").style.display = "flex";
+    document.querySelector(".led-stage-card").style.flexDirection = "column";
+    document.querySelector(".led-grid").style.flexGrow = "1";
+
+    renderRoundTimer(0);
+  </script>
+</body>
+</html>

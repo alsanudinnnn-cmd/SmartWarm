@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartWarm | Results Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body class="page-results">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">SW</span>
+        <span class="brand-copy">
+          <strong>SmartWarm</strong>
+          <span>Interactive LED Challenge</span>
+        </span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="index.html#register">Register Player</a>
+        <a href="#resultsTable">Leaderboard</a>
+        <a href="contact.html">Order Console</a>
+        <a href="admin.html" class="nav-circle-btn" title="Admin Panel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="results-hero">
+        <p class="eyebrow">Dedicated display mode</p>
+        <h1>Live results for the whole room.</h1>
+        <p>
+          Use this page on a TV or projector to keep the audience focused on
+          rankings as each player completes the SmartWarm challenge.
+        </p>
+        <div class="results-meta">
+          <span>Auto-sorted by fastest time</span>
+          <span>Realtime Firebase updates</span>
+          <span>Responsive event display</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <p class="eyebrow">Results board</p>
+          <h2>Current standings</h2>
+          <p>The table updates automatically whenever a new game result arrives.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table id="resultsTable">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Score</th>
+                <th>Time</th>
+                <th>Avg Reaction</th>
+                <th>Stage</th>
+                <th>Powers Used</th>
+                <th>Streak</th>
+              </tr>
+            </thead>
+            <tbody id="resultTable">
+              <tr>
+                <td colspan="5" class="empty-state">Waiting for results...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const { database: db, signInAnonymously } = window.smartWarmFirebase;
+    const resultTable = document.getElementById("resultTable");
+
+    signInAnonymously()
+      .then(() => {
+        db.ref("gameResults").on("value", (snapshot) => {
+          const data = snapshot.val();
+
+          if (!data) {
+            resultTable.innerHTML = '<tr><td colspan="8" class="empty-state">Waiting for results...</td></tr>';
+            return;
+          }
+
+          const resultsArray = Object.entries(data)
+            .map(([key, value]) => ({ key, ...value }))
+            .sort((a, b) => {
+              const scoreDiff = (Number(b.score) || 0) - (Number(a.score) || 0);
+              if (scoreDiff !== 0) return scoreDiff;
+              return (Number(a.timeTaken) || 0) - (Number(b.timeTaken) || 0);
+            });
+
+          resultTable.innerHTML = resultsArray.map((item, index) => {
+            const playerName = item.playerName ?? item.name ?? "Unknown";
+            const playerImage = item.playerImage ?? item.image ?? "";
+            const timeTaken = Number(item.timeTaken);
+            const score = item.score ?? 0;
+            const avgReactionTime = item.avgReactionTime ?? 0;
+            const stage = item.stage ?? 1;
+            const bestStreak = item.bestStreak ?? 0;
+            
+            // Build power pills
+            let pills = [];
+            if (item.timeCutSeconds > 0)    pills.push('<span class="power-pill pill-time">-5S</span>');
+            if (item.usedDoublePoints)      pills.push('<span class="power-pill pill-x2">x2</span>');
+            if (item.usedOnePointFivePoints)pills.push('<span class="power-pill pill-x1_5">x1.5</span>');
+            if (item.usedShield)            pills.push('<span class="power-pill pill-shield">SHIELD</span>');
+            if (item.usedSpeedBoost)        pills.push('<span class="power-pill pill-speed">BOOST</span>');
+            
+            if (pills.length === 0) {
+              pills.push('<span class="power-pill pill-none">PURE RUN</span>');
+            }
+
+            const imageMarkup = playerImage
+              ? `<img src="${playerImage}" alt="${playerName}">`
+              : `<div class="player-avatar-fallback" aria-hidden="true">${playerName.charAt(0).toUpperCase()}</div>`;
+
+            return `
+              <tr>
+                <td>${index + 1}</td>
+                <td>
+                  <div class="player-cell">
+                    ${imageMarkup}
+                    <div>
+                      <strong>${playerName}</strong>
+                    </div>
+                  </div>
+                </td>
+                <td><strong>${score}</strong></td>
+                <td>${Number.isFinite(timeTaken) ? `${timeTaken}s` : "-"}</td>
+                <td>${avgReactionTime > 0 ? `${avgReactionTime}ms` : "-"}</td>
+                <td>Stage ${stage}</td>
+                <td><div class="power-pills">${pills.join("")}</div></td>
+                <td>${bestStreak}</td>
+              </tr>
+            `;
+          }).join("");
+        }, (error) => {
+          console.error("FAILED", error);
+          resultTable.innerHTML = '<tr><td colspan="8" class="empty-state">Failed to load results.</td></tr>';
+        });
+      })
+      .catch((error) => {
+        console.error("FAILED", error);
+        resultTable.innerHTML = '<tr><td colspan="8" class="empty-state">Firebase sign-in failed.</td></tr>';
+      });
+  </script>
+</body>
+</html>

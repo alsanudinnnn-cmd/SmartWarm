@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartWarm | Interactive LED Challenge</title>
+  <meta name="description"
+    content="Register players, capture photos, monitor live LEDs, and watch the SmartWarm leaderboard update in real time.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="cloudinary-config.js"></script>
+</head>
+
+<body class="page-home">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">SW</span>
+        <span class="brand-copy">
+          <strong>SmartWarm</strong>
+          <span>Interactive LED Challenge</span>
+        </span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="#experience">Experience</a>
+        <a href="mouse-sim.html">Mouse Demo</a>
+        <a href="result.html">Leaderboard</a>
+        <a href="contact.html">Order Console</a>
+        <a href="admin.html" class="nav-circle-btn" title="Admin Panel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Realtime event microsite</p>
+          <h1>Turn your LED game into a branded live experience.</h1>
+          <p class="hero-text">
+            SmartWarm blends player check-in, photo capture, live device feedback,
+            and an always-on leaderboard into one sharp web interface for demos,
+            roadshows, and installations.
+          </p>
+
+          <div class="hero-actions">
+            <a class="button button-primary" href="#register">Register a player</a>
+            <a class="button button-secondary" href="mouse-sim.html">Try mouse demo</a>
+            <a class="button button-secondary" href="result.html">Open result board</a>
+          </div>
+
+          <div class="hero-metrics">
+            <article>
+              <strong>Live sync</strong>
+              <span>Firebase-powered updates across screens</span>
+            </article>
+            <article>
+              <strong>Camera ready</strong>
+              <span>Photo capture built into the registration flow</span>
+            </article>
+            <article>
+              <strong>Event friendly</strong>
+              <span>Responsive layout for laptops, tablets, and kiosks</span>
+            </article>
+          </div>
+        </div>
+        <div class="hero-card hero-card-guide">
+          <div class="panel-heading">
+            <p class="eyebrow">How it flows</p>
+            <h2>Register, look up, then play from the hardware station.</h2>
+            <p>
+              After registration, the player should immediately shift attention to
+              the live indicator below. That screen is now larger and positioned as
+              the next step in the game flow.
+            </p>
+          </div>
+
+          <div class="flow-list">
+            <article>
+              <strong>1. Register player</strong>
+              <span>Enter a name, open the camera, and capture the player photo.</span>
+            </article>
+            <article>
+              <strong>2. Watch the live target</strong>
+              <span>The big LED panel below mirrors the IoT hardware state in real time.</span>
+            </article>
+            <article>
+              <strong>3. Start the challenge</strong>
+              <span>Players react to the active position while the host tracks standings.</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="feature-strip" id="experience">
+        <article>
+          <h2>Fast player onboarding</h2>
+          <p>Capture a name and profile photo in seconds before the round begins.</p>
+        </article>
+        <article>
+          <h2>Realtime leaderboards</h2>
+          <p>Display standings instantly as players complete each stage.</p>
+        </article>
+        <article>
+          <h2>Built for live demos</h2>
+          <p>Clear visual hierarchy keeps hosts, players, and spectators aligned.</p>
+        </article>
+      </section>
+
+      <section class="workspace" id="register">
+        <div class="panel panel-form">
+          <div class="panel-heading">
+            <p class="eyebrow">Player registration</p>
+            <h2>Check in the next challenger</h2>
+            <p>
+              Add a player, capture their photo, and sync them to the SmartWarm
+              device queue. Once registered, the screen will switch to the live
+              LED indicator page for the player.
+            </p>
+          </div>
+
+          <label class="input-group" for="playerName">
+            <span>Player name</span>
+            <input type="text" id="playerName" placeholder="Enter participant name">
+          </label>
+
+          <div class="action-row">
+            <button class="button button-primary" type="button" onclick="openCamera()">
+              Open camera
+            </button>
+            <button class="button button-secondary" type="button" onclick="capturePhoto()">
+              Capture photo
+            </button>
+          </div>
+
+          <div class="camera-layout">
+            <div class="camera-card">
+              <video id="camera" autoplay playsinline muted></video>
+              <canvas id="canvas" hidden></canvas>
+              <p class="small-note">Camera preview appears here after permission is granted.</p>
+            </div>
+
+            <div class="preview-card">
+              <div class="preview-frame">
+                <img id="preview" alt="Player preview">
+                <div id="previewPlaceholder" class="preview-placeholder">
+                  Captured photo preview
+                </div>
+              </div>
+              <button class="button button-accent" type="button" onclick="submitPlayer()">
+                Register player
+              </button>
+            </div>
+          </div>
+
+          <p id="statusMessage" class="status-message" aria-live="polite">
+            Ready to register the next player.
+          </p>
+        </div>
+        <div class="panel panel-leaderboard" id="leaderboard">
+          <div class="panel-heading">
+            <p class="eyebrow">Live standings</p>
+            <h2>Leaderboard</h2>
+            <p>Fastest players rise to the top automatically.</p>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>Score</th>
+                  <th>Time</th>
+                  <th>Streak</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardBody">
+                <tr>
+                  <td colspan="5" class="empty-state">Waiting for game results...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const { database, signInAnonymously } = window.smartWarmFirebase;
+    const { uploadPlayerPhoto } = window.smartWarmCloudinary;
+
+    const leaderboardBody = document.getElementById("leaderboardBody");
+    const statusMessage = document.getElementById("statusMessage");
+    const preview = document.getElementById("preview");
+    const previewPlaceholder = document.getElementById("previewPlaceholder");
+
+    let stream;
+    let capturedBlob;
+
+    function setStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.dataset.state = type || "default";
+    }
+
+    async function openCamera() {
+      try {
+        const video = document.getElementById("camera");
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        setStatus("Camera connected. Capture a photo when the player is ready.", "success");
+      } catch (error) {
+        setStatus("Camera access was blocked. Please allow permission and try again.", "error");
+      }
+    }
+
+    function capturePhoto() {
+      const video = document.getElementById("camera");
+      const canvas = document.getElementById("canvas");
+
+      if (!video.srcObject) {
+        setStatus("Open the camera before capturing a photo.", "error");
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0);
+
+      canvas.toBlob((blob) => {
+        capturedBlob = blob;
+        preview.src = URL.createObjectURL(blob);
+        preview.classList.add("is-visible");
+        previewPlaceholder.hidden = true;
+        setStatus("Photo captured. Register the player to sync them to the game.", "success");
+      }, "image/jpeg", 0.92);
+    }
+
+    async function submitPlayer() {
+      const name = document.getElementById("playerName").value.trim();
+
+      if (!name || !capturedBlob) {
+        setStatus("Enter a player name and capture a photo before registering.", "error");
+        return;
+      }
+
+      setStatus("Uploading player photo and syncing registration...", "loading");
+
+      try {
+        const data = await uploadPlayerPhoto(capturedBlob);
+
+        await Promise.all([
+          database.ref("gameControl").set({
+            playerName: name,
+            playerImage: data.secure_url,
+            status: "ready",
+            stage: 0,
+            bestStreak: 0,
+            timeTaken: 0
+          }),
+          database.ref("gameStatus").set({
+            status: "ready",
+            currentLED: -1,
+            streak: 0,
+            bestStreak: 0
+          })
+        ]);
+
+        setStatus("Player registered successfully. Opening the LED indicator page...", "success");
+        document.getElementById("playerName").value = "";
+        capturedBlob = null;
+        preview.removeAttribute("src");
+        preview.classList.remove("is-visible");
+        previewPlaceholder.hidden = false;
+
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          document.getElementById("camera").srcObject = null;
+          stream = null;
+        }
+
+        setTimeout(() => {
+          window.location.href = "led.html";
+        }, 600);
+      } catch (error) {
+        console.error("Registration failed:", error);
+        setStatus(`Registration failed: ${error.message || "Please check Firebase and Cloudinary settings."}`, "error");
+      }
+    }
+
+    function handleDatabaseError(error) {
+      console.error("Firebase connection error:", error);
+      setStatus("Website connected to the page, but Firebase access failed. Check auth or database rules.", "error");
+      leaderboardBody.innerHTML = '<tr><td colspan="5" class="empty-state">Firebase connection failed.</td></tr>';
+    }
+
+    function attachDatabaseListeners() {
+      database.ref("gameResults").on("value", (snapshot) => {
+        const data = snapshot.val();
+
+        if (!data) {
+          leaderboardBody.innerHTML = '<tr><td colspan="5" class="empty-state">Waiting for game results...</td></tr>';
+          return;
+        }
+
+        const resultsArray = Object.entries(data)
+          .map(([key, value]) => ({ key, ...value }))
+          .sort((a, b) => {
+            const scoreDiff = (Number(b.score) || 0) - (Number(a.score) || 0);
+            if (scoreDiff !== 0) return scoreDiff;
+            return (Number(a.timeTaken) || 0) - (Number(b.timeTaken) || 0);
+          });
+
+        leaderboardBody.innerHTML = resultsArray.map((item, index) => `
+          ${(() => {
+            const playerName = item.playerName ?? item.name ?? "Unknown";
+            const playerImage = item.playerImage ?? item.image ?? "";
+            const timeTaken = Number(item.timeTaken);
+            const score = item.score ?? 0;
+            const bestStreak = item.bestStreak ?? 0;
+
+            const imageMarkup = playerImage
+              ? `<img src="${playerImage}" alt="${playerName}">`
+              : `<div class="player-avatar-fallback" aria-hidden="true">${playerName.charAt(0).toUpperCase()}</div>`;
+
+            return `
+          <tr>
+            <td>${index + 1}</td>
+            <td>
+              <div class="player-cell">
+                ${imageMarkup}
+                <div>
+                  <strong>${playerName}</strong>
+                </div>
+              </div>
+            </td>
+            <td><strong>${score}</strong></td>
+            <td>${Number.isFinite(timeTaken) ? `${timeTaken}s` : "-"}</td>
+            <td>${bestStreak}</td>
+          </tr>
+            `;
+          })()}
+        `).join("");
+      }, handleDatabaseError);
+
+    }
+
+    signInAnonymously()
+      .then(() => {
+        setStatus("Connected to Firebase. Ready to register the next player.", "success");
+        attachDatabaseListeners();
+      })
+      .catch((error) => {
+        console.error("Firebase auth error:", error);
+        setStatus("Firebase sign-in failed. Check the project's Authentication settings.", "error");
+        leaderboardBody.innerHTML = '<tr><td colspan="5" class="empty-state">Firebase sign-in failed.</td></tr>';
+      });
+  </script>
+</body>
+
+</html>
