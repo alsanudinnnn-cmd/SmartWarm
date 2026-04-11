@@ -13,11 +13,23 @@ const smartWarmApp = firebase.apps.length
   ? firebase.app()
   : firebase.initializeApp(smartWarmFirebaseConfig);
 
+// ✅ GUNA AUTH VARIABLE
+const auth = firebase.auth();
+
+// ✅ TAMBAH INI (SESSION ONLY)
+auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+  .then(() => {
+    console.log("Session persistence ON");
+  })
+  .catch((error) => {
+    console.error("Error setting persistence:", error);
+  });
+
 window.smartWarmFirebase = {
   app: smartWarmApp,
-  auth: firebase.auth(),
+  auth: auth,
   database: firebase.database(),
   signInAnonymously() {
-    return firebase.auth().signInAnonymously();
+    return auth.signInAnonymously();
   }
 };

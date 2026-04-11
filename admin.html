@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartWarm | Admin Panel</title>
   <meta name="description" content="Admin control panel for managing SmartWarm game results and player data.">
+  <link rel="icon" type="image/x-icon" href="SmartWarm-LOGO.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -673,11 +674,11 @@
   </style>
 </head>
 
-<body class="page-admin">
+<body class="page-home">
   <div class="site-shell">
     <header class="site-header" data-site-header>
       <a class="brand" href="index.html">
-        <span class="brand-mark">SW</span>
+        <img class="brand-mark" src="SmartWarm-LOGO.png" alt="SmartWarm logo">
         <span class="brand-copy">
           <strong>SmartWarm</strong>
           <span>Interactive LED Challenge</span>
@@ -903,14 +904,14 @@
     }
 
     /* ── CUSTOM DB AUTH LOGIC ── */
-    signInAnonymously().catch(err => console.error("Firebase connection error", err));
+    //signInAnonymously().catch(err => console.error("Firebase connection error", err));
 
     const authGate = document.getElementById('authGate');
     const adminApp = document.getElementById('adminApp');
     const logoutBtn = document.getElementById('logoutBtn');
 
     // Check localStorage auto-login on standard load
-    if (localStorage.getItem("adminLogged") === "true") {
+    if (sessionStorage.getItem("adminLogged") === "true") {
       unlockDashboard();
     }
 
@@ -965,7 +966,7 @@
         }
 
         if (isValid) {
-          localStorage.setItem("adminLogged", "true");
+          sessionStorage.setItem("adminLogged", "true");
           document.getElementById('loginForm').reset();
           unlockDashboard();
         } else {
@@ -986,7 +987,7 @@
     }
 
     function logoutAdmin() {
-      localStorage.removeItem("adminLogged");
+      sessionStorage.removeItem("adminLogged");
       adminApp.style.display = 'none';
       logoutBtn.style.display = 'none';
       authGate.style.display = 'flex';
@@ -1375,20 +1376,7 @@
     });
 
     /* ── Init ── */
-    signInAnonymously()
-      .then(() => {
-        attachListener();
-      })
-      .catch((error) => {
-        console.error("Firebase auth error:", error);
-        adminTableBody.innerHTML = `
-          <tr><td colspan="7">
-            <div class="empty-state-admin">
-              <p>Firebase sign-in failed</p>
-              <span>${error.message}</span>
-            </div>
-          </td></tr>`;
-      });
+    attachListener();
   </script>
 </body>
 
