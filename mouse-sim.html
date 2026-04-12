@@ -276,13 +276,19 @@
     }
 
     .led-pad {
+      --pad-accent: rgba(255, 255, 255, 0.22);
+      --pad-accent-strong: rgba(255, 255, 255, 0.9);
+      --pad-surface: rgba(255, 255, 255, 0.08);
+      --pad-surface-deep: rgba(255, 255, 255, 0.03);
+      --pad-glow: rgba(255, 255, 255, 0.22);
+      --pad-label: #d6b6fa;
       position: relative;
       min-height: 180px;
       padding: 20px;
       border-radius: 28px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      background: linear-gradient(180deg, var(--pad-surface), var(--pad-surface-deep));
       color: #fdf8ff;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid color-mix(in srgb, var(--pad-accent) 60%, rgba(255, 255, 255, 0.06));
       text-align: left;
       overflow: hidden;
     }
@@ -294,14 +300,14 @@
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.18);
+      background: var(--pad-accent);
       transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
     }
 
     .led-pad span {
       display: block;
       margin-bottom: 14px;
-      color: #d6b6fa;
+      color: var(--pad-label);
       font-size: 0.85rem;
       letter-spacing: 0.16em;
       text-transform: uppercase;
@@ -320,8 +326,8 @@
     }
 
     .led-pad.active {
-      background: linear-gradient(180deg, #ff84ea, #b93cff);
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12), 0 0 46px rgba(196, 70, 255, 0.34);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--pad-accent-strong) 34%, #ffffff 8%), var(--pad-accent-strong));
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12), 0 0 46px var(--pad-glow);
       transform: translateY(-2px);
     }
 
@@ -329,6 +335,43 @@
       background: #fff3ec;
       box-shadow: 0 0 18px rgba(255, 255, 255, 0.8);
       transform: scale(1.15);
+    }
+
+    .led-pad[data-index="0"] {
+      --pad-accent: rgba(96, 182, 255, 0.22);
+      --pad-accent-strong: #3b82f6;
+      --pad-surface: rgba(96, 182, 255, 0.16);
+      --pad-surface-deep: rgba(59, 130, 246, 0.06);
+      --pad-glow: rgba(59, 130, 246, 0.34);
+      --pad-label: #bdddff;
+    }
+
+    .led-pad[data-index="1"] {
+      --pad-accent: rgba(255, 213, 92, 0.22);
+      --pad-accent-strong: #f59e0b;
+      --pad-surface: rgba(255, 213, 92, 0.16);
+      --pad-surface-deep: rgba(245, 158, 11, 0.06);
+      --pad-glow: rgba(245, 158, 11, 0.34);
+      --pad-label: #ffe7a6;
+      color: #fff8e8;
+    }
+
+    .led-pad[data-index="2"] {
+      --pad-accent: rgba(255, 110, 110, 0.22);
+      --pad-accent-strong: #ef4444;
+      --pad-surface: rgba(255, 110, 110, 0.16);
+      --pad-surface-deep: rgba(239, 68, 68, 0.06);
+      --pad-glow: rgba(239, 68, 68, 0.34);
+      --pad-label: #ffc1c1;
+    }
+
+    .led-pad[data-index="3"] {
+      --pad-accent: rgba(74, 222, 128, 0.22);
+      --pad-accent-strong: #22c55e;
+      --pad-surface: rgba(74, 222, 128, 0.16);
+      --pad-surface-deep: rgba(34, 197, 94, 0.06);
+      --pad-glow: rgba(34, 197, 94, 0.34);
+      --pad-label: #baf5c9;
     }
 
     .led-pad.miss {
@@ -432,6 +475,29 @@
       transform: translateY(0) scale(1);
     }
 
+    .promo-offer {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 212, 122, 0.24), rgba(255, 143, 43, 0.18));
+      border: 1px solid rgba(255, 212, 122, 0.34);
+      box-shadow: 0 12px 30px rgba(255, 163, 64, 0.18);
+      color: #fff0c4;
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .promo-offer strong {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.05rem;
+      color: #fff;
+    }
+
     .promo-card h3 {
       font-family: "Space Grotesk", sans-serif;
       font-size: 1.8rem;
@@ -439,6 +505,13 @@
       background: linear-gradient(180deg, #fff, #ffd47a);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+
+    .promo-note {
+      margin-top: 14px;
+      color: #ffd9a3;
+      font-size: 0.92rem;
+      line-height: 1.55;
     }
 
     .promo-card p {
@@ -624,24 +697,61 @@
 
         <div class="fun-facts-container">
           <div class="fun-fact-card">
-            <div class="fun-fact-icon">?</div>
+            <div class="fun-fact-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="8"></circle>
+                <path d="M12 8v4l2.5 2.5"></path>
+              </svg>
+            </div>
             <div class="fun-fact-content">
               <h4>Average Human Reaction</h4>
               <p>The typical response time to visual stimuli is ~250ms. Can you beat the global average today?</p>
             </div>
           </div>
           <div class="fun-fact-card">
-            <div class="fun-fact-icon">??</div>
+            <div class="fun-fact-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13 3 4 14h6l-1 7 9-11h-6l1-7Z"></path>
+              </svg>
+            </div>
             <div class="fun-fact-content">
               <h4>Pro-Level Reflexes</h4>
               <p>Elite athletes and pro gamers often clock in under 200ms. Keep practicing to reach the top tier!</p>
             </div>
           </div>
           <div class="fun-fact-card">
-            <div class="fun-fact-icon">??</div>
+            <div class="fun-fact-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21c4.97-2.77 8-6.44 8-10.5A4.5 4.5 0 0 0 12 7a4.5 4.5 0 0 0-8 3.5C4 14.56 7.03 18.23 12 21Z"></path>
+                <path d="M9 12.5c1 .8 1.8 1.3 3 1.3s2-.5 3-1.3"></path>
+              </svg>
+            </div>
             <div class="fun-fact-content">
               <h4>Mind & Body Sync</h4>
               <p>Games like SmartWarm help sharpen hand-eye coordination and improve peripheral vision awareness.</p>
+            </div>
+          </div>
+          <div class="fun-fact-card">
+            <div class="fun-fact-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12h4l2-5 4 10 2-5h4"></path>
+              </svg>
+            </div>
+            <div class="fun-fact-content">
+              <h4>Consistency Beats Speed</h4>
+              <p>Top performers are not just fast once, they stay accurate across every round and avoid wasted movements.</p>
+            </div>
+          </div>
+          <div class="fun-fact-card">
+            <div class="fun-fact-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="8"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+              </svg>
+            </div>
+            <div class="fun-fact-content">
+              <h4>Focus Narrows Delay</h4>
+              <p>Locking your eyes on the center and reacting with short, precise movements can cut hesitation between targets.</p>
             </div>
           </div>
         </div>
@@ -681,8 +791,13 @@
   <!-- Promo Modal -->
   <div class="promo-overlay" id="promoOverlay">
     <div class="promo-card">
+      <div class="promo-offer">
+        <strong>-15%</strong>
+        <span>Demo Day Promo</span>
+      </div>
       <h3>Love the demo?</h3>
       <p>Experience the thrill in real life. Order your SmartWarm LED console today and challenge your friends!</p>
+      <p class="promo-note">Claim an exclusive 15% event discount when you place your order after trying the demo.</p>
       <div class="promo-actions">
         <button class="primary" onclick="window.location.href='contact.html'">Order Console Now</button>
         <button class="secondary" onclick="closePromoModal()">Play Again</button>

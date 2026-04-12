@@ -46,8 +46,8 @@ const byte TOTAL_STAGES = 3;
 
 const byte STAGE_TARGET_PHASE[TOTAL_STAGES] = {
   5,   // Stage 1
-  10,  // Stage 2
-  15   // Stage 3
+  8,   // Stage 2
+  10   // Stage 3
 };
 
 // Stage-scaled scoring: harder stages reward more points

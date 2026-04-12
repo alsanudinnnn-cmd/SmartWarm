@@ -36,6 +36,12 @@
       color: #5eead4;
       text-shadow: 0 0 80px rgba(94,234,212,0.9), 0 0 40px rgba(94,234,212,0.5);
     }
+
+    .countdown-display.is-ready {
+      font-size: clamp(4.8rem, 13vw, 9rem);
+      color: #fff3c9;
+      text-shadow: 0 0 80px rgba(255,212,122,0.85), 0 0 40px rgba(255,184,77,0.4);
+    }
     @keyframes countdown-pop {
       0%   { transform: scale(1.6); opacity: 0; }
       28%  { transform: scale(1);   opacity: 1; }
@@ -157,30 +163,501 @@
       color: #1e0a4e; box-shadow: 0 24px 54px rgba(167,139,250,.32);
     }
     .super-power-overlay.sp-speed .super-power-card p { color: rgba(30,10,78,.78); }
+
+    .player-profile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 20px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 20px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .player-profile-main {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .player-avatar-wrap {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #3b1774;
+      border: 2px solid #ffb84d;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(255, 184, 77, 0.3);
+    }
+
+    .player-avatar-media,
+    .player-avatar-fallback {
+      width: 100%;
+      height: 100%;
+    }
+
+    .player-avatar-media {
+      object-fit: cover;
+      display: none;
+    }
+
+    .player-avatar-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .player-profile-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .player-profile-kicker {
+      margin-bottom: 4px;
+      font-size: 0.7rem;
+    }
+
+    .player-profile-name {
+      margin-bottom: 4px;
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    .player-profile-summary {
+      font-size: 0.95rem;
+      color: #c8b5ea;
+    }
+
+    .player-stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(112px, 1fr));
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .player-stats-strip .streak-card {
+      min-height: 86px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+
+    .player-stats-strip .streak-card strong {
+      font-size: clamp(1.55rem, 2vw, 2.1rem);
+    }
+
+    .player-stats-strip .streak-card.is-urgent {
+      border-color: rgba(255, 184, 77, 0.34);
+      background: linear-gradient(180deg, rgba(255, 184, 77, 0.18), rgba(255, 95, 225, 0.1));
+      box-shadow: 0 0 24px rgba(255, 184, 77, 0.22);
+      animation: clutch-timer-pulse 800ms ease-in-out infinite alternate;
+    }
+
+    .player-stats-strip .streak-card.is-urgent strong {
+      color: #fff6d2;
+      text-shadow: 0 0 18px rgba(255, 184, 77, 0.45);
+    }
+
+    .page-led .indicator-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .page-led .stage-progress-wrap {
+      margin-top: 0;
+      min-width: min(320px, 100%);
+      align-self: start;
+      transform: translateY(-8px);
+    }
+
+    .page-led .led-stage-wrap {
+      margin-top: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .stage-progress-wrap.is-clutch {
+      border-color: rgba(255, 184, 77, 0.24);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 10px 24px rgba(10, 2, 20, 0.22),
+        0 0 30px rgba(255, 184, 77, 0.16);
+      animation: clutch-stage-pulse 760ms ease-in-out infinite alternate;
+    }
+
+    .stage-progress-wrap.is-clutch .stage-progress-label {
+      border-color: rgba(255, 212, 122, 0.36);
+      box-shadow: 0 0 24px rgba(255, 184, 77, 0.28);
+    }
+
+    .clutch-hint {
+      display: block;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      min-height: 1.5em;
+      margin-top: 8px;
+      font-size: 0.96rem;
+      color: #ffd47a;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 180ms ease, transform 180ms ease;
+      text-align: right;
+    }
+
+    .clutch-hint.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .indicator-title {
+      transition: opacity 180ms ease, transform 180ms ease;
+      min-height: 0;
+    }
+
+    .indicator-title.is-hidden {
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+    }
+
+    .indicator-title.is-idle {
+      font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+      line-height: 1.1;
+      color: #d9c4f7;
+      opacity: 0.9;
+    }
+
+    .perfect-moment-overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      z-index: 8;
+      opacity: 0;
+    }
+
+    .perfect-moment-overlay.is-visible {
+      opacity: 1;
+    }
+
+    .perfect-moment-card {
+      width: min(620px, calc(100vw - 36px));
+      padding: 22px 26px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: linear-gradient(180deg, rgba(255, 247, 196, 0.98), rgba(255, 184, 77, 0.94));
+      color: #381300;
+      text-align: center;
+      box-shadow: 0 24px 54px rgba(255, 163, 64, 0.3);
+      transform: translateY(18px) scale(0.9);
+      opacity: 0;
+    }
+
+    .perfect-moment-overlay.is-lightning .perfect-moment-card {
+      background: linear-gradient(180deg, rgba(197, 244, 255, 0.98), rgba(103, 232, 249, 0.92));
+      color: #06384a;
+      box-shadow: 0 24px 54px rgba(103, 232, 249, 0.26);
+    }
+
+    .perfect-moment-overlay.is-chain .perfect-moment-card {
+      background: linear-gradient(180deg, rgba(255, 234, 163, 0.98), rgba(255, 154, 61, 0.92));
+      color: #3f1700;
+    }
+
+    .perfect-moment-overlay.is-visible .perfect-moment-card {
+      animation: perfect-moment-pop 1500ms cubic-bezier(.18,.88,.24,1) forwards;
+    }
+
+    .perfect-moment-kicker {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.34);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .perfect-moment-title {
+      display: block;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 0.95;
+    }
+
+    .perfect-moment-text {
+      margin-top: 10px;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: rgba(56, 19, 0, 0.76);
+    }
+
+    .target-bursts,
+    .victory-confetti {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .target-bursts {
+      z-index: 4;
+    }
+
+    .victory-confetti {
+      z-index: 6;
+    }
+
+    .target-burst-ring,
+    .target-burst-spark,
+    .victory-piece {
+      position: absolute;
+      left: var(--burst-x, 50%);
+      top: var(--burst-y, 50%);
+      pointer-events: none;
+    }
+
+    .target-burst-ring {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 223, 144, 0.72);
+      box-shadow: 0 0 20px rgba(255, 184, 77, 0.28);
+      transform: translate(-50%, -50%) scale(0.3);
+      animation: target-ring-pop 620ms cubic-bezier(.18,.88,.24,1) forwards;
+    }
+
+    .target-burst-spark {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 246, 203, 0.96), rgba(255, 145, 80, 0.94));
+      box-shadow: 0 0 16px rgba(255, 184, 77, 0.34);
+      transform: translate(-50%, -50%);
+      animation: target-spark-fly 700ms cubic-bezier(.18,.88,.24,1) forwards;
+    }
+
+    .victory-piece {
+      width: 10px;
+      height: 18px;
+      border-radius: 4px;
+      opacity: 0;
+      transform: translate(-50%, -50%) rotate(0deg);
+      animation: confetti-drop var(--fall-duration, 1600ms) linear forwards;
+    }
+
+    .victory-piece.is-loss {
+      width: 12px;
+      height: 12px;
+      border-radius: 50% 50% 42% 42%;
+      animation: confetti-drop-loss var(--fall-duration, 1400ms) linear forwards;
+    }
+
+    .streak-card.is-hype {
+      animation: stat-hype-pop 520ms cubic-bezier(.18,.88,.24,1);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 24px rgba(255, 184, 77, 0.16);
+    }
+
+    .page-led .led-tile-large {
+      position: relative;
+      overflow: hidden;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .page-led .led-tile-large::after {
+      content: "";
+      position: absolute;
+      inset: 10%;
+      border-radius: 24px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.24), transparent 66%);
+      opacity: 0;
+      transform: scale(0.76);
+      transition: opacity 180ms ease, transform 180ms ease;
+      pointer-events: none;
+    }
+
+    .page-led .led-tile-large strong,
+    .page-led .led-tile-large span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-led .led-tile-large.active {
+      transform: translateY(-4px) scale(1.035);
+      box-shadow:
+        0 0 54px rgba(196, 70, 255, 0.5),
+        0 0 120px rgba(196, 70, 255, 0.18);
+    }
+
+    .page-led .led-tile-large.active::after {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+
+    .page-led .led-tile-large.active strong {
+      text-shadow: 0 0 18px rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes clutch-timer-pulse {
+      from {
+        transform: translateY(0);
+        box-shadow: 0 0 18px rgba(255, 184, 77, 0.18);
+      }
+      to {
+        transform: translateY(-2px);
+        box-shadow: 0 0 30px rgba(255, 184, 77, 0.3);
+      }
+    }
+
+    @keyframes clutch-stage-pulse {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(1.015);
+      }
+    }
+
+    @keyframes perfect-moment-pop {
+      0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.9);
+      }
+      18% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      70% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-14px) scale(1.04);
+      }
+    }
+
+    @keyframes target-ring-pop {
+      0% {
+        opacity: 0.95;
+        transform: translate(-50%, -50%) scale(0.3);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(4.6);
+      }
+    }
+
+    @keyframes target-spark-fly {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate(var(--spark-x, 0px), var(--spark-y, -80px)) scale(0.35);
+      }
+    }
+
+    @keyframes confetti-drop {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -30px) rotate(0deg) scale(0.7);
+      }
+      10% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--confetti-x, 0px)), calc(-50% + var(--confetti-y, 360px))) rotate(var(--confetti-rotate, 360deg)) scale(0.9);
+      }
+    }
+
+    @keyframes confetti-drop-loss {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -18px) scale(0.8);
+      }
+      14% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--confetti-x, 0px)), calc(-50% + var(--confetti-y, 220px))) scale(0.3);
+      }
+    }
+
+    @keyframes stat-hype-pop {
+      0% {
+        transform: scale(1);
+      }
+      40% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
     @media (max-width: 760px) {
       .player-profile-header {
         flex-direction: column !important;
-        align-items: flex-start !important;
+        align-items: stretch !important;
         padding: 16px !important;
       }
 
-      .player-profile-info,
-      .player-profile-header .results-meta {
+      .player-profile-main,
+      .player-profile-info {
         width: 100%;
       }
 
-      .player-profile-header .results-meta {
-        text-align: left !important;
+      .player-profile-main {
+        align-items: flex-start !important;
       }
 
-      .player-profile-header h1 {
+      .player-profile-name {
         font-size: 1.45rem !important;
+      }
+
+      .player-stats-strip {
+        width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .page-led .indicator-head {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+      }
+
+      .page-led .stage-progress-wrap {
+        min-width: 0;
+        transform: none;
       }
 
       .stage-progress-wrap {
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
+      }
+
+      .clutch-hint {
+        text-align: left;
       }
 
       .stage-progress-label {
@@ -194,6 +671,24 @@
   <script src="firebase-config.js"></script>
 </head>
 <body class="page-led">
+  <audio id="gameStartSound" preload="auto">
+    <source src="soundeffect/Game%20Start.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="gameWinSound" preload="auto">
+    <source src="soundeffect/Game%20Win.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="gameLoseSound" preload="auto">
+    <source src="soundeffect/Game%20Over%20(Lose).mp3" type="audio/mpeg">
+  </audio>
+  <audio id="levelUpSound" preload="auto">
+    <source src="soundeffect/Level%20Up.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="streakSound" preload="auto">
+    <source src="soundeffect/Streak.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="powerCardSound" preload="auto">
+    <source src="soundeffect/PowerCard.mp3" type="audio/mpeg">
+  </audio>
   <div id="hitFlash" class="hit-flash" aria-hidden="true"></div>
   <div id="impactRings" class="impact-rings" aria-hidden="true">
     <span class="impact-ring impact-ring-1"></span>
@@ -227,6 +722,13 @@
       <p id="levelUpText">Welcome to Stage 2</p>
     </div>
   </div>
+  <div id="perfectMomentOverlay" class="perfect-moment-overlay" aria-hidden="true">
+    <div class="perfect-moment-card">
+      <span id="perfectMomentKicker" class="perfect-moment-kicker">Perfect moment</span>
+      <strong id="perfectMomentTitle" class="perfect-moment-title">PERFECT CHAIN</strong>
+      <p id="perfectMomentText" class="perfect-moment-text">That run was locked in.</p>
+    </div>
+  </div>
   <div id="superPowerOverlay" class="super-power-overlay" aria-hidden="true">
     <div id="superPowerCard" class="super-power-card">
       <span id="superPowerKicker" class="super-power-kicker">Super power received</span>
@@ -236,7 +738,7 @@
   </div>
   <!-- Countdown overlay -->
   <div id="countdownOverlay" class="countdown-overlay" aria-hidden="true">
-    <div id="countdownDisplay" class="countdown-display">3</div>
+    <div id="countdownDisplay" class="countdown-display">Ready?</div>
   </div>
 
   <div class="streak-overlay" aria-hidden="true">
@@ -261,20 +763,35 @@
 
 
     <main class="led-page-layout">
-      <section class="player-profile-header" style="display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: rgba(0,0,0,0.2); border-radius: 16px; margin-bottom: 12px;">
-        <div class="player-avatar-wrap" style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #3b1774; border: 2px solid #ffb84d; flex-shrink: 0; box-shadow: 0 4px 12px rgba(255, 184, 77, 0.3);">
-          <img id="playerProfileImage" src="" alt="" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
-          <div id="playerAvatarFallback" class="player-avatar-fallback" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; color: #fff;">?</div>
+      <section class="player-profile-header">
+        <div class="player-profile-main">
+          <div class="player-avatar-wrap">
+            <img id="playerProfileImage" class="player-avatar-media" src="" alt="" />
+            <div id="playerAvatarFallback" class="player-avatar-fallback">?</div>
+          </div>
+          <div class="player-profile-info">
+            <p class="eyebrow player-profile-kicker">Player Screen</p>
+            <h1 id="playerProfileName" class="player-profile-name">Waiting for Player...</h1>
+            <p id="playerSummary" class="player-profile-summary">Register on the host device to start the challenge.</p>
+          </div>
         </div>
-        <div class="player-profile-info" style="flex-grow: 1;">
-          <p class="eyebrow" style="margin-bottom: 4px; font-size: 0.7rem;">Player Screen</p>
-          <h1 id="playerProfileName" style="font-size: 1.8rem; margin-bottom: 4px; line-height: 1;">Waiting for Player...</h1>
-          <p id="playerSummary" style="font-size: 0.95rem; color: #c8b5ea;">Register on the host device to start the challenge.</p>
-        </div>
-        <div class="results-meta" style="text-align: right;">
-          <span id="gameStateBadge" style="display: inline-block; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 999px; margin-bottom: 4px; font-size: 0.85rem;">Waiting for player</span>
-          <br>
-          <span style="font-size: 0.8rem; color: #c8b5ea;">Auto-redirects to leaderboard</span>
+        <div class="player-stats-strip">
+          <article class="streak-card">
+            <span>Time</span>
+            <strong id="timerValue">0.0s</strong>
+          </article>
+          <article class="streak-card">
+            <span>Current streak</span>
+            <strong id="currentStreakValue">0</strong>
+          </article>
+          <article class="streak-card">
+            <span>Best streak</span>
+            <strong id="bestStreakValue">0</strong>
+          </article>
+          <article class="streak-card streak-card-score">
+            <span>Score</span>
+            <strong id="liveScoreValue">0</strong>
+          </article>
         </div>
       </section>
 
@@ -282,6 +799,8 @@
         <div id="playAura" class="play-aura" aria-hidden="true"></div>
         <div id="scoreFloats" class="score-floats" aria-hidden="true"></div>
         <div id="comboParticles" class="combo-particles" aria-hidden="true"></div>
+        <div id="targetBursts" class="target-bursts" aria-hidden="true"></div>
+        <div id="victoryConfetti" class="victory-confetti" aria-hidden="true"></div>
         <div id="ambientParticles" class="ambient-particles" aria-hidden="true"></div>
         <div id="speedLines" class="speed-lines" aria-hidden="true">
           <span></span>
@@ -308,28 +827,10 @@
             </span>
             <strong id="heroLedLabel" class="indicator-title">Waiting for LED update</strong>
           </div>
-          <div class="streak-strip">
-            <article class="streak-card">
-              <span>Time</span>
-              <strong id="timerValue">0.0s</strong>
-            </article>
-            <article class="streak-card">
-              <span>Current streak</span>
-              <strong id="currentStreakValue">0</strong>
-            </article>
-            <article class="streak-card">
-              <span>Best streak</span>
-              <strong id="bestStreakValue">0</strong>
-            </article>
-            <article class="streak-card streak-card-score">
-              <span>Score</span>
-              <strong id="liveScoreValue">0</strong>
-            </article>
-          </div>
-          <!-- Stage progress bar -->
           <div class="stage-progress-wrap">
             <div id="stageProgressBar" class="stage-progress-bar"></div>
             <span id="stageProgressLabel" class="stage-progress-label">Stage 1 · 0/5</span>
+            <span id="clutchHint" class="clutch-hint" aria-live="polite"></span>
           </div>
         </div>
 
@@ -372,7 +873,6 @@
     const currentStreakValue = document.getElementById("currentStreakValue");
     const bestStreakValue = document.getElementById("bestStreakValue");
     const playerSummary = document.getElementById("playerSummary");
-    const gameStateBadge = document.getElementById("gameStateBadge");
     const ledPageStatus = document.getElementById("ledPageStatus");
     const hitFlash = document.getElementById("hitFlash");
     const impactRings = document.getElementById("impactRings");
@@ -382,6 +882,10 @@
     const endMessageKicker = document.getElementById("endMessageKicker");
     const endMessageTitle = document.getElementById("endMessageTitle");
     const endMessageText = document.getElementById("endMessageText");
+    const perfectMomentOverlay = document.getElementById("perfectMomentOverlay");
+    const perfectMomentKicker = document.getElementById("perfectMomentKicker");
+    const perfectMomentTitle = document.getElementById("perfectMomentTitle");
+    const perfectMomentText = document.getElementById("perfectMomentText");
     const levelUpOverlay = document.getElementById("levelUpOverlay");
     const levelUpCard = document.getElementById("levelUpCard");
     const levelUpText = document.getElementById("levelUpText");
@@ -395,6 +899,8 @@
     const streakFireBurst = document.getElementById("streakFireBurst");
     const playAura = document.getElementById("playAura");
     const comboParticles = document.getElementById("comboParticles");
+    const targetBursts = document.getElementById("targetBursts");
+    const victoryConfetti = document.getElementById("victoryConfetti");
     const ambientParticles = document.getElementById("ambientParticles");
     const speedLines = document.getElementById("speedLines");
     const comboMeter = document.getElementById("comboMeter");
@@ -403,6 +909,15 @@
     const superPowerReadyValue = document.getElementById("superPowerReadyValue");
     const superPowerStartButton = document.getElementById("superPowerStartButton");
     const timerValue = document.getElementById("timerValue");
+    const timerCard = timerValue.closest(".streak-card");
+    const currentStreakCard = currentStreakValue.closest(".streak-card");
+    const bestStreakCard = bestStreakValue.closest(".streak-card");
+    const gameStartSound = document.getElementById("gameStartSound");
+    const gameWinSound = document.getElementById("gameWinSound");
+    const gameLoseSound = document.getElementById("gameLoseSound");
+    const levelUpSound = document.getElementById("levelUpSound");
+    const streakSound = document.getElementById("streakSound");
+    const powerCardSound = document.getElementById("powerCardSound");
 
     // New elements
     const liveScoreValue     = document.getElementById("liveScoreValue");
@@ -412,6 +927,10 @@
     const countdownOverlay   = document.getElementById("countdownOverlay");
     const countdownDisplay   = document.getElementById("countdownDisplay");
     const streakMilestone    = document.getElementById("streakMilestone");
+    const scoreCard          = liveScoreValue.closest(".streak-card");
+    const clutchHint         = document.getElementById("clutchHint");
+    const ledButtons         = ledNames.map((_, index) => document.getElementById(`led${index}`));
+    const stageProgressWrap  = stageProgressBar.parentElement;
 
     let hasRedirectedToResults = false;
     let lastStreakValue = 0;
@@ -425,6 +944,7 @@
     let endMessageTimeout;
     let comboMeterTimeout;
     let ambientParticleTimer;
+    let victoryCleanupTimeout;
     let lastStageValue = 0;
     let lastStageShown = 0;
     let latestLevelEventStage = 0;
@@ -447,13 +967,70 @@
     let lastScore = 0;
     let lastCountdownEvent = 0;
     let countdownTimeouts = [];
-    const STAGE_TARGETS = [5, 10, 15];
+    let audioPrimed = false;
+    let currentStagePhase = 0;
+    let stageStartedAt = 0;
+    let lastClutchHint = "";
+    let clutchModeActive = false;
+    let perfectMomentTimeout;
+    let lastPerfectChainAt = 0;
+    const STAGE_TARGETS = [5, 8, 10];
     const MILESTONE_LABELS = { 3: "🔥 On Fire", 6: "⚡ Lightning", 9: "💥 Unstoppable", 12: "🌟 Legendary", 15: "👑 Godlike" };
+    const STAGE_TIME_HINTS = [10, 14, 18];
+
+    function setHeroTargetLabel(text = "", { idle = false } = {}) {
+      const hasText = Boolean(text);
+      heroLedLabel.textContent = text;
+      heroLedLabel.classList.toggle("is-hidden", !hasText);
+      heroLedLabel.classList.toggle("is-idle", hasText && idle);
+    }
+
+    function pulseCard(card) {
+      if (!card) {
+        return;
+      }
+
+      card.classList.remove("is-hype");
+      void card.offsetWidth;
+      card.classList.add("is-hype");
+      setTimeout(() => card.classList.remove("is-hype"), 560);
+    }
+
+    function primeAudio() {
+      if (audioPrimed) {
+        return;
+      }
+
+      audioPrimed = true;
+      [gameStartSound, gameWinSound, gameLoseSound, levelUpSound, streakSound, powerCardSound].forEach((audio) => {
+        if (!audio) {
+          return;
+        }
+
+        audio.volume = 0.9;
+        audio.load();
+      });
+    }
+
+    function playGameSound(audio, label) {
+      if (!audio) {
+        return;
+      }
+
+      audio.pause();
+      audio.currentTime = 0;
+
+      const playAttempt = audio.play();
+      if (playAttempt && typeof playAttempt.then === "function") {
+        playAttempt.catch(() => {});
+      }
+    }
 
     function renderRoundTimer(elapsedMs) {
       const safeElapsed = Math.max(0, elapsedMs);
 
       timerValue.textContent = `${(safeElapsed / 1000).toFixed(1)}s`;
+      updateClutchMode({ elapsedMs: safeElapsed });
     }
 
 
@@ -514,9 +1091,57 @@
     }
 
     function clearActiveLed() {
-      for (let i = 0; i < 4; i += 1) {
-        document.getElementById(`led${i}`).classList.remove("active");
+      ledButtons.forEach((button) => button.classList.remove("active"));
+    }
+
+    function setClutchHint(message = "") {
+      lastClutchHint = message;
+      clutchHint.textContent = message;
+      clutchHint.classList.toggle("is-visible", Boolean(message));
+    }
+
+    function updateClutchMode({ phase = currentStagePhase, stage = Math.max(1, lastStageValue || 1), elapsedMs } = {}) {
+      const target = STAGE_TARGETS[Math.min(stage - 1, STAGE_TARGETS.length - 1)] || STAGE_TARGETS[0];
+      const remainingHits = Math.max(0, target - Math.max(0, Number(phase) || 0));
+      const safeElapsedMs = typeof elapsedMs === "number"
+        ? elapsedMs
+        : (timerIsActive && roundStartedAt ? Math.max(0, Date.now() - roundStartedAt - roundTimeBonusMs) : 0);
+      const urgentSeconds = STAGE_TIME_HINTS[Math.min(stage - 1, STAGE_TIME_HINTS.length - 1)] || 12;
+      const isNearClear = remainingHits > 0 && remainingHits <= 2;
+      const isLowTime = timerIsActive && (safeElapsedMs / 1000) >= urgentSeconds;
+      clutchModeActive = Boolean(isNearClear || isLowTime);
+
+      timerCard.classList.toggle("is-urgent", clutchModeActive);
+      stageProgressWrap.classList.toggle("is-clutch", clutchModeActive);
+
+      if (isNearClear) {
+        setClutchHint(`${remainingHits} hit${remainingHits === 1 ? "" : "s"} to clear`);
+      } else if (isLowTime) {
+        setClutchHint("Clutch time. Push the finish.");
+      } else if (lastStatusValue === "playing") {
+        setClutchHint("");
       }
+    }
+
+    function showPerfectMoment(type, title, text) {
+      clearTimeout(perfectMomentTimeout);
+      perfectMomentOverlay.className = "perfect-moment-overlay is-visible";
+      if (type === "lightning") {
+        perfectMomentOverlay.classList.add("is-lightning");
+        perfectMomentKicker.textContent = "Fast clear";
+      } else if (type === "chain") {
+        perfectMomentOverlay.classList.add("is-chain");
+        perfectMomentKicker.textContent = "Heat check";
+      } else {
+        perfectMomentKicker.textContent = "Stage reward";
+      }
+
+      perfectMomentTitle.textContent = title;
+      perfectMomentText.textContent = text;
+
+      perfectMomentTimeout = setTimeout(() => {
+        perfectMomentOverlay.className = "perfect-moment-overlay";
+      }, 1550);
     }
 
     function redirectToResults(delay = 1200) {
@@ -532,7 +1157,7 @@
       }, delay);
     }
 
-    function clearEffects() {
+    function clearEffects({ preserveCountdown = false } = {}) {
       streakPopup.classList.remove("is-visible");
       streakFireBurst.classList.remove("is-active");
       impactRings.classList.remove("is-active");
@@ -544,6 +1169,8 @@
       comboMeter.classList.remove("is-visible", "is-max");
       comboMeterValue.textContent = "x1";
       comboParticles.innerHTML = "";
+      targetBursts.innerHTML = "";
+      victoryConfetti.innerHTML = "";
       ambientParticles.innerHTML = "";
       scoreFloats.innerHTML = "";
       levelUpOverlay.classList.remove("is-visible");
@@ -552,18 +1179,30 @@
       superPowerCard.classList.remove("is-visible");
       endMessageOverlay.classList.remove("is-visible", "is-win", "is-loss");
       endMessageCard.classList.remove("is-visible");
-      countdownOverlay.classList.remove("is-visible");
-      countdownTimeouts.forEach(clearTimeout);
-      countdownTimeouts = [];
+      if (!preserveCountdown) {
+        countdownOverlay.classList.remove("is-visible");
+        countdownTimeouts.forEach(clearTimeout);
+        countdownTimeouts = [];
+      }
       stageProgressBar.style.setProperty("--progress", "0%");
-      stageProgressLabel.textContent = "Stage 1 · 0/5";
+      stageProgressLabel.textContent = `Stage 1 · 0/${STAGE_TARGETS[0]}`;
       streakMilestone.textContent = "";
       liveScoreValue.textContent = "0";
       lastScore = 0;
+      currentStagePhase = 0;
+      stageStartedAt = 0;
+      clutchModeActive = false;
+      setClutchHint("");
+      timerCard.classList.remove("is-urgent");
+      stageProgressWrap.classList.remove("is-clutch");
+      clearTimeout(perfectMomentTimeout);
+      perfectMomentOverlay.className = "perfect-moment-overlay";
+      setHeroTargetLabel("Get Ready", { idle: true });
       const lossHeart = document.getElementById("lossHeartOverlay");
       if (lossHeart) lossHeart.classList.remove("is-visible");
       document.body.classList.remove("on-fire", "loss-shake", "screen-shake");
       clearInterval(ambientParticleTimer);
+      clearTimeout(victoryCleanupTimeout);
     }
 
     function updateSuperPowerReadyCard(detail, state, ready) {
@@ -621,6 +1260,7 @@
       
       triggerHitFlash();
       spawnComboParticles(type === "win" ? 10 : 6);
+      spawnVictoryConfetti(type);
 
       clearTimeout(shakeTimeout);
       shakeTimeout = setTimeout(() => {
@@ -636,6 +1276,8 @@
     }
 
     function showLevelUp(stage) {
+      playGameSound(levelUpSound, "Level up");
+
       const title = stage === 1 ? "Stage 1!" : "Level UP!";
       const text = stage === 1
         ? "Stage 1 is live. Let's go!"
@@ -707,6 +1349,7 @@
         void strong.offsetWidth;
         strong.classList.add("score-bump");
         setTimeout(() => strong.classList.remove("score-bump"), 480);
+        pulseCard(scoreCard);
       }
       liveScoreValue.textContent = newScore;
       lastScore = newScore;
@@ -716,8 +1359,10 @@
     function updateStageProgress(phase, stage) {
       const target = STAGE_TARGETS[Math.min(stage - 1, 2)];
       const pct = Math.min(100, Math.round((phase / target) * 100));
+      currentStagePhase = phase;
       stageProgressBar.style.setProperty("--progress", `${pct}%`);
       stageProgressLabel.textContent = `Stage ${stage} · ${phase}/${target}`;
+      updateClutchMode({ phase, stage });
     }
 
     // ── Countdown overlay ──
@@ -726,24 +1371,22 @@
       countdownTimeouts = [];
       countdownOverlay.classList.add("is-visible");
       const steps = [
-        { text: "3", delay: 0 },
-        { text: "2", delay: 700 },
-        { text: "1", delay: 1400 },
-        { text: "GO!", delay: 2100, isGo: true },
+        { text: "Ready?", delay: 0, isReady: true },
+        { text: "GO!", delay: 900, isGo: true },
       ];
-      steps.forEach(({ text, delay, isGo }) => {
+      steps.forEach(({ text, delay, isGo, isReady }) => {
         countdownTimeouts.push(setTimeout(() => {
           countdownDisplay.textContent = text;
-          countdownDisplay.className = "countdown-display" + (isGo ? " is-go" : "");
+          countdownDisplay.className = "countdown-display" + (isGo ? " is-go" : "") + (isReady ? " is-ready" : "");
           // re-trigger animation
           countdownDisplay.style.animation = "none";
           void countdownDisplay.offsetWidth;
-          countdownDisplay.style.animation = "countdown-pop 700ms ease forwards";
+          countdownDisplay.style.animation = "countdown-pop 760ms ease forwards";
         }, delay));
       });
       countdownTimeouts.push(setTimeout(() => {
         countdownOverlay.classList.remove("is-visible");
-      }, 3000));
+      }, 1900));
     }
 
     function showSuperPowerOverlay(title, detail, state) {
@@ -793,6 +1436,8 @@
         return;
       }
 
+      const previousStage = lastStageShown;
+      const elapsedInStage = stageStartedAt ? Math.max(0, Date.now() - stageStartedAt) : 0;
       lastStageValue = stage;
 
       if (stage === lastStageShown) {
@@ -800,6 +1445,17 @@
       }
 
       lastStageShown = stage;
+      stageStartedAt = Date.now();
+      currentStagePhase = 0;
+      updateClutchMode({ phase: 0, stage, elapsedMs: 0 });
+      if (previousStage > 0) {
+        const lightningThreshold = 7000 + (stage * 1000);
+        if (elapsedInStage > 0 && elapsedInStage <= lightningThreshold) {
+          showPerfectMoment("lightning", "LIGHTNING ROUND", "That stage disappeared fast.");
+        } else {
+          showPerfectMoment("bonus", "STAGE CLEAR BONUS", `Stage ${previousStage} cleared. Keep the pressure on.`);
+        }
+      }
       showLevelUp(stage);
     }
 
@@ -817,6 +1473,68 @@
         impactRings.classList.remove("is-active");
         edgePulse.classList.remove("is-active");
       }, 320);
+    }
+
+    function spawnTargetBurst(ledIndex, intensity = 1) {
+      const tile = ledButtons[ledIndex];
+      if (!tile || !targetBursts) {
+        return;
+      }
+
+      const burstRect = targetBursts.getBoundingClientRect();
+      const tileRect = tile.getBoundingClientRect();
+      const centerX = tileRect.left - burstRect.left + tileRect.width / 2;
+      const centerY = tileRect.top - burstRect.top + tileRect.height / 2;
+
+      const ring = document.createElement("span");
+      ring.className = "target-burst-ring";
+      ring.style.setProperty("--burst-x", `${centerX}px`);
+      ring.style.setProperty("--burst-y", `${centerY}px`);
+      targetBursts.appendChild(ring);
+
+      const sparkCount = Math.min(12, 6 + intensity * 2);
+      for (let i = 0; i < sparkCount; i += 1) {
+        const spark = document.createElement("span");
+        const angle = (Math.PI * 2 * i) / sparkCount + Math.random() * 0.35;
+        const distance = 48 + Math.random() * 62;
+        spark.className = "target-burst-spark";
+        spark.style.setProperty("--burst-x", `${centerX}px`);
+        spark.style.setProperty("--burst-y", `${centerY}px`);
+        spark.style.setProperty("--spark-x", `${Math.cos(angle) * distance}px`);
+        spark.style.setProperty("--spark-y", `${Math.sin(angle) * distance}px`);
+        spark.style.animationDelay = `${(Math.random() * 0.08).toFixed(2)}s`;
+        targetBursts.appendChild(spark);
+        setTimeout(() => spark.remove(), 760);
+      }
+
+      setTimeout(() => ring.remove(), 660);
+    }
+
+    function spawnVictoryConfetti(type = "win") {
+      victoryConfetti.innerHTML = "";
+      clearTimeout(victoryCleanupTimeout);
+
+      const count = type === "win" ? 28 : 16;
+      const palette = type === "win"
+        ? ["#ffd66b", "#ff8f2b", "#5eead4", "#ff6bd6", "#fff4c2"]
+        : ["#8fdcff", "#5eead4", "#ff9c7f", "#ffd7c4"];
+
+      for (let i = 0; i < count; i += 1) {
+        const piece = document.createElement("span");
+        piece.className = `victory-piece${type === "loss" ? " is-loss" : ""}`;
+        piece.style.left = `${8 + Math.random() * 84}%`;
+        piece.style.top = `${type === "win" ? 10 + Math.random() * 20 : 48 + Math.random() * 12}%`;
+        piece.style.background = palette[i % palette.length];
+        piece.style.setProperty("--confetti-x", `${(Math.random() * 260 - 130).toFixed(0)}px`);
+        piece.style.setProperty("--confetti-y", `${type === "win" ? 260 + Math.random() * 180 : 120 + Math.random() * 120}px`);
+        piece.style.setProperty("--confetti-rotate", `${(Math.random() * 720 - 360).toFixed(0)}deg`);
+        piece.style.setProperty("--fall-duration", `${(type === "win" ? 1400 : 1100) + Math.random() * 700}ms`);
+        victoryConfetti.appendChild(piece);
+      }
+
+      victoryCleanupTimeout = setTimeout(() => {
+        victoryConfetti.innerHTML = "";
+      }, type === "win" ? 2400 : 1800);
     }
 
     function spawnComboParticles(strength) {
@@ -882,6 +1600,10 @@
     function triggerStreakEffect(streak) {
       if (streak < 3) return;
 
+      if (streak === 3) {
+        playGameSound(streakSound, "Streak");
+      }
+
       const milestones = [15, 12, 9, 6, 3];
       const label = milestones.find(m => streak >= m);
       const milestoneText = label ? MILESTONE_LABELS[label] : "";
@@ -899,6 +1621,13 @@
       triggerHitFlash();
       spawnComboParticles(streak);
       updateComboMeter(streak);
+      pulseCard(currentStreakCard);
+      if (streak >= Number(bestStreakValue.textContent || 0)) {
+        pulseCard(bestStreakCard);
+      }
+      if (lastLedIndex >= 0) {
+        spawnTargetBurst(lastLedIndex, Math.min(5, streak));
+      }
 
       clearTimeout(streakEffectTimeout);
       clearTimeout(fireEffectTimeout);
@@ -910,6 +1639,14 @@
         streakPopup.classList.remove("is-visible");
         streakMilestone.textContent = "";
       }, 1500);
+
+      if (streak >= 5) {
+        const now = Date.now();
+        if (now - lastPerfectChainAt > 2600) {
+          lastPerfectChainAt = now;
+          showPerfectMoment("chain", "PERFECT CHAIN", `${streak} clean hits in a row.`);
+        }
+      }
     }
 
     function attachListeners() {
@@ -939,7 +1676,6 @@
           document.getElementById("playerAvatarFallback").textContent = data.playerName.charAt(0).toUpperCase();
         }
         
-        gameStateBadge.textContent = `Player status: ${status}`;
       }, handleError);
 
       database.ref("gameStatus/currentLED").on("value", (snapshot) => {
@@ -948,8 +1684,8 @@
 
         if (ledIndex !== null && ledIndex >= 0 && ledIndex < ledNames.length) {
           document.getElementById(`led${ledIndex}`).classList.add("active");
-          heroLedLabel.textContent = `${ledNames[ledIndex]} is active`;
-
+          setHeroTargetLabel(`${ledNames[ledIndex]} is active`);
+          spawnTargetBurst(ledIndex, Math.max(1, Math.min(4, lastStreakValue + 1)));
           if (lastLedIndex !== -1 && lastLedIndex !== ledIndex) {
             triggerHitFlash();
             spawnComboParticles(Math.max(lastStreakValue, 1));
@@ -957,7 +1693,7 @@
 
           lastLedIndex = ledIndex;
         } else {
-          heroLedLabel.textContent = "Waiting for LED update";
+          setHeroTargetLabel("Target incoming", { idle: true });
           lastLedIndex = -1;
         }
       }, handleError);
@@ -1061,6 +1797,8 @@
               if (/5\s*second/i.test(detail)) {
                 addRoundTimeBonus(5000);
               }
+            } else {
+              playGameSound(powerCardSound, "Power card");
             }
 
             showSuperPowerOverlay(title, detail, state);
@@ -1070,12 +1808,11 @@
 
       database.ref("gameStatus/status").on("value", (snapshot) => {
         const status = snapshot.val() || "waiting";
-        gameStateBadge.textContent = `Game status: ${status}`;
 
         if (status === "ready" || status === "countdown") {
           setPageStatus("Player registered. Waiting for the host to start the round.", "success");
           clearActiveLed();
-          heroLedLabel.textContent = "Waiting for LED update";
+          setHeroTargetLabel(status === "countdown" ? "Round starting" : "Get Ready", { idle: true });
           lastStreakValue = 0;
           lastLedIndex = -1;
           lastStageValue = 0;
@@ -1088,23 +1825,22 @@
           latestSuperPowerState = "none";
           latestSuperPowerReady = false;
           currentStreakValue.textContent = "0";
-          clearEffects();
+          clearEffects({ preserveCountdown: status === "countdown" });
           stopRoundTimer({ reset: true });
+          stageStartedAt = 0;
           lastStatusValue = status;
           return;
         }
 
         if (status === "playing") {
-          // Hide countdown if still visible
-          countdownOverlay.classList.remove("is-visible");
-          countdownTimeouts.forEach(clearTimeout);
-          countdownTimeouts = [];
           setPageStatus("Game in progress. Follow the highlighted LED.", "loading");
           playAura.classList.add("is-live");
           speedLines.classList.add("is-live");
           startAmbientParticles();
           if (lastStatusValue !== "playing") {
+            stageStartedAt = Date.now();
             startRoundTimer();
+            playGameSound(gameStartSound, "Game start");
           }
           lastStatusValue = status;
           return;
@@ -1114,8 +1850,14 @@
           clearEffects();
           stopRoundTimer();
           if (status === "win" || status === "completed") {
+            if (lastStatusValue !== status) {
+              playGameSound(gameWinSound, "Victory");
+            }
             showEndMessage("win");
           } else {
+            if (lastStatusValue !== status) {
+              playGameSound(gameLoseSound, "Game over");
+            }
             showEndMessage("loss");
           }
           redirectToResults(2600);
@@ -1183,7 +1925,12 @@
     document.querySelector(".led-stage-card").style.flexDirection = "column";
     document.querySelector(".led-grid").style.flexGrow = "1";
 
+    ["pointerdown", "touchstart", "keydown"].forEach((eventName) => {
+      window.addEventListener(eventName, primeAudio, { once: true });
+    });
+
     renderRoundTimer(0);
+    setHeroTargetLabel("Get Ready", { idle: true });
   </script>
 </body>
 </html>
