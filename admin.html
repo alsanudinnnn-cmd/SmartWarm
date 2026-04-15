@@ -90,13 +90,19 @@
       color: var(--text);
       font: inherit;
       font-size: 0.95rem;
-      transition: border-color 180ms ease, box-shadow 180ms ease;
+      transition: all 180ms ease;
     }
 
     .admin-search:focus {
       outline: none;
       border-color: rgba(255, 184, 77, 0.48);
       box-shadow: 0 0 0 4px rgba(255, 184, 77, 0.12);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .admin-search:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .admin-search::placeholder {
@@ -108,10 +114,18 @@
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.14);
       box-shadow: 0 12px 28px rgba(230, 57, 70, 0.22);
+      transition: all 200ms ease;
+      cursor: pointer;
     }
 
-    .button-danger:hover {
+    .button-danger:hover:not(:disabled) {
       box-shadow: 0 16px 38px rgba(230, 57, 70, 0.36);
+      transform: translateY(-2px);
+    }
+
+    .button-danger:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .button-sm {
@@ -133,11 +147,43 @@
 
     .admin-table-wrap {
       overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      position: relative;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Firefox scrollbar */
+    .admin-table-wrap::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .admin-table-wrap::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .admin-table-wrap::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      transition: background 200ms ease;
+    }
+
+    .admin-table-wrap::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
     }
 
     .admin-table {
       width: 100%;
       border-collapse: collapse;
+    }
+
+    .admin-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+      backdrop-filter: blur(8px);
     }
 
     .admin-table thead th {
@@ -149,6 +195,8 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       white-space: nowrap;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      padding-top: 12px;
     }
 
     .admin-table thead th:last-child {
@@ -451,12 +499,14 @@
       font-size: 1.05rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 180ms ease;
+      transition: all 200ms ease;
     }
 
     .admin-tab:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
       color: #fff;
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
     }
 
     .admin-tab.is-active {
@@ -578,16 +628,17 @@
 
     .orders-table thead th {
       padding: 0 10px 16px;
+      text-align: center;
     }
 
     .orders-table thead th:nth-child(5) {
-      text-align: left;
+      text-align: center;
       padding-left: 4px;
       padding-right: 0;
     }
 
     .orders-table thead th:nth-child(6) {
-      text-align: left;
+      text-align: center;
       padding-left: 6px;
       padding-right: 0;
     }
@@ -744,7 +795,30 @@
     }
 
     #panelOrders .admin-table-wrap {
-      overflow-x: hidden;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 184, 77, 0.4) rgba(255, 255, 255, 0.05);
+    }
+
+    /* Webkit scrollbar styling for Chrome, Edge, Safari */
+    #panelOrders .admin-table-wrap::-webkit-scrollbar {
+      height: 10px;
+    }
+
+    #panelOrders .admin-table-wrap::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    #panelOrders .admin-table-wrap::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(255, 184, 77, 0.5), rgba(255, 184, 77, 0.3));
+      border-radius: 10px;
+      transition: background 200ms ease;
+    }
+
+    #panelOrders .admin-table-wrap::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(255, 184, 77, 0.8), rgba(255, 184, 77, 0.6));
     }
 
     #authGate {
@@ -926,11 +1000,347 @@
       .orders-table {
         min-width: 100%;
       }
+
+      /* Orders table mobile improvements */
+      .orders-table thead {
+        font-size: 0.7rem;
+      }
+
+      .orders-table thead th {
+        padding: 8px 6px 12px;
+      }
+
+      .orders-table tbody td {
+        padding: 12px 6px;
+        font-size: 0.85rem;
+      }
+
+      .orders-table tbody td:first-child {
+        min-width: 110px;
+      }
+
+      .order-customer strong {
+        font-size: 0.9rem;
+      }
+
+      .order-customer span {
+        font-size: 0.75rem;
+      }
+
+      .order-meta-item {
+        padding: 8px 10px;
+      }
+
+      .order-meta-label,
+      .order-message-label {
+        font-size: 0.65rem;
+      }
+
+      .order-meta-value {
+        font-size: 0.8rem;
+      }
+
+      .use-case-badge {
+        font-size: 0.7rem;
+        padding: 5px 10px;
+      }
+
+      .order-message-copy {
+        font-size: 0.78rem;
+        -webkit-line-clamp: 3;
+      }
+
+      .order-actions {
+        gap: 5px;
+      }
+
+      .btn-whatsapp,
+      .btn-email {
+        min-height: 36px;
+        font-size: 0.75rem;
+        padding: 0 12px;
+      }
+
+      .delete-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .delete-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .orders-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .orders-stat-card {
+        padding: 14px 16px;
+      }
+
+      .orders-stat-card strong {
+        font-size: 1.3rem;
+      }
+
+      .orders-stat-card span {
+        font-size: 0.8rem;
+      }
+
+      /* Reorganize orders table for smaller screens */
+      #panelOrders .admin-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .orders-table {
+        min-width: 600px;
+      }
+
+      .orders-table thead th {
+        padding: 8px 4px 10px;
+        font-size: 0.65rem;
+      }
+
+      .orders-table tbody td {
+        padding: 10px 4px;
+        font-size: 0.80rem;
+      }
+
+      .orders-table tbody td:first-child {
+        min-width: 100px;
+      }
+
+      .order-customer {
+        gap: 2px;
+      }
+
+      .order-customer strong {
+        font-size: 0.85rem;
+      }
+
+      .order-customer span {
+        font-size: 0.70rem;
+      }
+
+      .order-meta-item {
+        padding: 6px 8px;
+        gap: 2px;
+      }
+
+      .order-meta-label {
+        font-size: 0.60rem;
+        margin-bottom: 2px;
+      }
+
+      .order-meta-value {
+        font-size: 0.75rem;
+      }
+
+      .use-case-badge {
+        font-size: 0.65rem;
+        padding: 4px 8px;
+      }
+
+      .order-message {
+        gap: 6px;
+      }
+
+      .order-message-label {
+        font-size: 0.60rem;
+      }
+
+      .order-message-copy {
+        font-size: 0.73rem;
+        -webkit-line-clamp: 2;
+        line-height: 1.4;
+      }
+
+      .order-actions {
+        gap: 4px;
+      }
+
+      .btn-whatsapp {
+        min-height: 34px;
+        min-width: 100px;
+        font-size: 0.70rem;
+        padding: 0 10px;
+        gap: 6px;
+      }
+
+      .btn-whatsapp svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .btn-email {
+        min-height: 34px;
+        min-width: 100px;
+        font-size: 0.70rem;
+        padding: 0 10px;
+        gap: 6px;
+      }
+
+      .btn-email svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .delete-btn {
+        width: 32px;
+        height: 32px;
+      }
+
+      .delete-btn svg {
+        width: 14px;
+        height: 14px;
+      }
     }
 
     @media (max-width: 540px) {
       .orders-stats {
         grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .orders-stat-card {
+        padding: 12px 14px;
+      }
+
+      .orders-stat-card strong {
+        font-size: 1.2rem;
+      }
+
+      .orders-stat-card span {
+        font-size: 0.75rem;
+        line-height: 1.4;
+      }
+
+      .admin-panel {
+        padding: 16px;
+      }
+
+      .orders-table {
+        min-width: 500px;
+        table-layout: auto;
+      }
+
+      .orders-table colgroup {
+        display: none;
+      }
+
+      .orders-table thead th {
+        padding: 6px 3px 8px;
+        font-size: 0.60rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+      }
+
+      .orders-table tbody td {
+        padding: 8px 3px;
+        font-size: 0.75rem;
+      }
+
+      .orders-table tbody td:first-child {
+        min-width: 85px;
+        font-size: 0.70rem;
+      }
+
+      .order-customer strong {
+        font-size: 0.80rem;
+        line-height: 1.2;
+      }
+
+      .order-customer span {
+        font-size: 0.65rem;
+      }
+
+      .order-meta {
+        gap: 6px;
+      }
+
+      .order-meta-item {
+        padding: 5px 7px;
+        gap: 2px;
+        border-radius: 10px;
+      }
+
+      .order-meta-label {
+        font-size: 0.55rem;
+        letter-spacing: 0.04em;
+      }
+
+      .order-meta-value {
+        font-size: 0.72rem;
+        line-height: 1.35;
+      }
+
+      .use-case-badge {
+        font-size: 0.60rem;
+        padding: 3px 7px;
+        border-radius: 8px;
+      }
+
+      .order-message {
+        gap: 4px;
+      }
+
+      .order-message-label {
+        font-size: 0.55rem;
+        letter-spacing: 0.04em;
+      }
+
+      .order-message-copy {
+        font-size: 0.70rem;
+        -webkit-line-clamp: 2;
+        line-height: 1.3;
+      }
+
+      .order-actions {
+        gap: 3px;
+        justify-items: start;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+      }
+
+      .btn-whatsapp {
+        min-height: 32px;
+        min-width: 90px;
+        font-size: 0.65rem;
+        padding: 0 8px;
+        gap: 4px;
+      }
+
+      .btn-whatsapp svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      .btn-email {
+        min-height: 32px;
+        min-width: 90px;
+        font-size: 0.65rem;
+        padding: 0 8px;
+        gap: 4px;
+      }
+
+      .btn-email svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      .delete-btn {
+        width: 30px;
+        height: 30px;
+        margin-left: 0 !important;
+      }
+
+      .delete-btn svg {
+        width: 13px;
+        height: 13px;
       }
     }
   </style>
