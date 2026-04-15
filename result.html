@@ -189,6 +189,66 @@
       margin-top: -4px;
     }
 
+    .power-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      justify-content: center;
+    }
+
+    .power-card {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .pill-x2 {
+      color: #ffe08a;
+      background: rgba(255, 210, 92, 0.16);
+      border-color: rgba(255, 210, 92, 0.38);
+    }
+
+    .pill-x1_5 {
+      color: #ffb089;
+      background: rgba(255, 141, 103, 0.14);
+      border-color: rgba(255, 141, 103, 0.34);
+    }
+
+    .pill-shield {
+      color: #b7dcff;
+      background: rgba(125, 184, 255, 0.14);
+      border-color: rgba(125, 184, 255, 0.34);
+    }
+
+    .pill-speed {
+      color: #b8ffe4;
+      background: rgba(94, 234, 212, 0.15);
+      border-color: rgba(94, 234, 212, 0.36);
+    }
+
+    .pill-time {
+      color: #f6d0ff;
+      background: rgba(233, 150, 255, 0.14);
+      border-color: rgba(233, 150, 255, 0.34);
+    }
+
+    .pill-none {
+      color: #d1c2eb;
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
     /* Empty podium slot */
     .podium-card.is-empty {
       opacity: 0.35;
@@ -374,8 +434,7 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
 
-    .podium-sparkles,
-    .podium-burst {
+    .podium-sparkles {
       position: absolute;
       inset: 0;
       pointer-events: none;
@@ -392,8 +451,71 @@
       animation: sparkle-drift 9s linear infinite;
     }
 
+    .podium-effects {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+    }
+
     .podium-burst {
+      position: absolute;
+      inset: 0;
       overflow: hidden;
+      pointer-events: none;
+    }
+
+    .podium-popper {
+      position: absolute;
+      bottom: 86px;
+      width: 34px;
+      height: 58px;
+      border-radius: 12px 12px 18px 18px;
+      clip-path: polygon(26% 0, 74% 0, 100% 100%, 0 100%);
+      background: linear-gradient(180deg, #ffe08a, #ff8f5a);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+      transform-origin: bottom center;
+      opacity: 0.92;
+      pointer-events: none;
+    }
+
+    .podium-popper.left {
+      left: 8%;
+      --popper-angle: -26deg;
+      transform: rotate(var(--popper-angle));
+    }
+
+    .podium-popper.right {
+      right: 8%;
+      --popper-angle: 26deg;
+      transform: rotate(var(--popper-angle));
+    }
+
+    .podium-popper::after {
+      content: "";
+      position: absolute;
+      width: 88px;
+      height: 88px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 32% 18%, rgba(255, 214, 107, 0.86) 0 3px, transparent 3.5px),
+        radial-gradient(circle at 70% 30%, rgba(124, 199, 255, 0.82) 0 2px, transparent 2.5px),
+        radial-gradient(circle at 42% 58%, rgba(255, 95, 162, 0.82) 0 2px, transparent 2.5px),
+        radial-gradient(circle at 18% 46%, rgba(255, 255, 255, 0.86) 0 2px, transparent 2.5px);
+      opacity: 0;
+      top: -70px;
+      left: -30px;
+      transform: scale(0.3) translateY(20px);
+      filter: drop-shadow(0 0 8px rgba(255, 214, 107, 0.28));
+    }
+
+    .podium-popper.is-firing {
+      animation: popper-kick 520ms ease;
+    }
+
+    .podium-popper.is-firing::after {
+      animation: popper-spray 620ms ease;
     }
 
     .podium-beam {
@@ -541,6 +663,26 @@
       }
     }
 
+    @keyframes popper-kick {
+      0% { transform: rotate(var(--popper-angle, 0deg)) translateY(0); }
+      35% { transform: rotate(calc(var(--popper-angle, 0deg) + 9deg)) translateY(-8px); }
+      100% { transform: rotate(var(--popper-angle, 0deg)) translateY(0); }
+    }
+
+    @keyframes popper-spray {
+      0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(20px);
+      }
+      30% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1) translateY(-24px);
+      }
+    }
+
     /* ── Responsive ── */
     @media (max-width: 620px) {
       .podium-row {
@@ -579,6 +721,18 @@
         bottom: 40px;
       }
 
+      .podium-popper {
+        bottom: 38px;
+      }
+
+      .podium-popper.left {
+        left: 3%;
+      }
+
+      .podium-popper.right {
+        right: 3%;
+      }
+
       .podium-beam.center {
         width: 160px;
         height: 240px;
@@ -599,9 +753,7 @@
       .podium-sparkles,
       .podium-beam,
       .podium-crown,
-      .podium-card.rank-1,
-      .podium-card.is-celebrating,
-      .confetti-piece {
+      .podium-card.rank-1 {
         animation: none !important;
       }
     }
@@ -669,6 +821,10 @@
           <div class="podium-beam left"></div>
           <div class="podium-beam center"></div>
           <div class="podium-beam right"></div>
+        </div>
+        <div class="podium-effects" aria-hidden="true">
+          <div class="podium-popper left" id="podiumPopperLeft"></div>
+          <div class="podium-popper right" id="podiumPopperRight"></div>
           <div class="podium-burst" id="podiumBurst"></div>
         </div>
         <div class="podium-heading">
@@ -744,8 +900,13 @@
 const { database: db, signInAnonymously } = window.smartWarmFirebase;
 const resultTable = document.getElementById("resultTable");
 const podiumBurst = document.getElementById("podiumBurst");
+const podiumPoppers = [
+  document.getElementById("podiumPopperLeft"),
+  document.getElementById("podiumPopperRight")
+].filter(Boolean);
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let previousPodiumSignature = "";
+let hasShownInitialPodiumCelebration = false;
 
 
 // =======================
@@ -758,7 +919,7 @@ function saveResult(data) {
 }
 
 function celebratePodium() {
-  if (!podiumBurst || prefersReducedMotion.matches) return;
+  if (!podiumBurst) return;
 
   const colors = ["#ffd66b", "#ff8f5a", "#7cc7ff", "#ffffff", "#ff5fa2"];
   const shapes = ["square", "ribbon"];
@@ -781,6 +942,12 @@ function celebratePodium() {
     podiumBurst.appendChild(piece);
   }
 
+  podiumPoppers.forEach((popper) => {
+    popper.classList.remove("is-firing");
+    void popper.offsetWidth;
+    popper.classList.add("is-firing");
+  });
+
   const championCard = document.getElementById("podium1");
   championCard?.classList.remove("is-celebrating");
   void championCard?.offsetWidth;
@@ -790,6 +957,7 @@ function celebratePodium() {
   celebratePodium.cleanupTimer = window.setTimeout(() => {
     podiumBurst.innerHTML = "";
     championCard?.classList.remove("is-celebrating");
+    podiumPoppers.forEach((popper) => popper.classList.remove("is-firing"));
   }, 2400);
 }
 
@@ -836,32 +1004,7 @@ function fillPodiumSlot(rank, item) {
   const time  = Number(item.timeTaken);
   const image = item.playerImage ?? item.image ?? "";
 
-  // ✅ POWER BADGES (BETUL)
-  const pills = [];
-
-  if (item.usedDoublePoints) pills.push(`
-    <div class="power-card pill-x2">⚡ x2</div>
-  `);
-
-  if (item.usedOnePointFivePoints) pills.push(`
-    <div class="power-card pill-x1_5">🔥 x1.5</div>
-  `);
-
-  if (item.usedShield) pills.push(`
-    <div class="power-card pill-shield">🛡️ Shield</div>
-  `);
-
-  if (item.usedSpeedBoost) pills.push(`
-    <div class="power-card pill-speed">💨 Boost</div>
-  `);
-
-  if (item.timeCutSeconds > 0) pills.push(`
-    <div class="power-card pill-time">⏱️ -5s</div>
-  `);
-
-  if (pills.length === 0) pills.push(`
-    <div class="power-card pill-none">Pure</div>
-  `);
+  const pills = buildPowerPills(item);
 
   card.classList.remove("is-empty");
 
@@ -889,6 +1032,20 @@ function fillPodiumSlot(rank, item) {
   }
 }
 
+function buildPowerPills(item) {
+  const pills = [];
+
+  if (item.timeCutSeconds > 0) pills.push(`<div class="power-card pill-time">Time -5s</div>`);
+  if (item.usedDoublePoints) pills.push(`<div class="power-card pill-x2">Double x2</div>`);
+  if (item.usedOnePointFivePoints) pills.push(`<div class="power-card pill-x1_5">Bonus x1.5</div>`);
+  if (item.usedShield) pills.push(`<div class="power-card pill-shield">Shield</div>`);
+  if (item.usedSpeedBoost) pills.push(`<div class="power-card pill-speed">Boost</div>`);
+
+  if (pills.length === 0) pills.push(`<div class="power-card pill-none">Pure</div>`);
+
+  return pills;
+}
+
 
 // =======================
 // 🏆 TABLE FUNCTION
@@ -908,49 +1065,7 @@ function buildTable(resultsArray) {
     const stage = item.stage ?? 1;
     const bestStreak = item.bestStreak ?? 0;
 
-    // ✅ POWER SYSTEM (FIXED)
-const pills = [];
-
-if (item.timeCutSeconds > 0) pills.push(`
-  <div class="power-card pill-time">
-    <span>⏱️</span>
-    <small>-5s</small>
-  </div>
-`);
-
-if (item.usedDoublePoints) pills.push(`
-  <div class="power-card pill-x2">
-    <span>⚡</span>
-    <small>x2</small>
-  </div>
-`);
-
-if (item.usedOnePointFivePoints) pills.push(`
-  <div class="power-card pill-x1_5">
-    <span>🔥</span>
-    <small>x1.5</small>
-  </div>
-`);
-
-if (item.usedShield) pills.push(`
-  <div class="power-card pill-shield">
-    <span>🛡️</span>
-    <small>Shield</small>
-  </div>
-`);
-
-if (item.usedSpeedBoost) pills.push(`
-  <div class="power-card pill-speed">
-    <span>💨</span>
-    <small>Boost</small>
-  </div>
-`);
-
-if (pills.length === 0) pills.push(`
-  <div class="power-card pill-none">
-    <small>Pure</small>
-  </div>
-`);
+    const pills = buildPowerPills(item);
 
     // ✅ PROFILE IMAGE (FIXED)
     const imageMarkup = playerImage
@@ -994,6 +1109,7 @@ signInAnonymously()
         fillPodiumSlot(2, null);
         fillPodiumSlot(3, null);
         previousPodiumSignature = "";
+        hasShownInitialPodiumCelebration = false;
         resultTable.innerHTML = '<tr><td colspan="8">Waiting...</td></tr>';
         return;
       }
@@ -1016,8 +1132,12 @@ signInAnonymously()
       fillPodiumSlot(2, sorted[1]);
       fillPodiumSlot(3, sorted[2]);
 
-      if (podiumSignature && podiumSignature !== previousPodiumSignature) {
-        celebratePodium();
+      if (!hasShownInitialPodiumCelebration && sorted.length > 0) {
+        window.setTimeout(celebratePodium, 220);
+        hasShownInitialPodiumCelebration = true;
+        previousPodiumSignature = podiumSignature;
+      } else if (podiumSignature && podiumSignature !== previousPodiumSignature) {
+        window.setTimeout(celebratePodium, 220);
         previousPodiumSignature = podiumSignature;
       }
 
