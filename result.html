@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartWarm | Results Board</title>
+  <meta name="description" content="Live SmartWarm leaderboard — real-time rankings sorted by score and fastest time.">
   <link rel="icon" type="image/x-icon" href="SmartWarm-LOGO.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +13,600 @@
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ── Podium Section ── */
+    .podium-section {
+      padding: 48px 0 32px;
+    }
+
+    .podium-heading {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .podium-heading .eyebrow {
+      margin-bottom: 8px;
+    }
+
+    .podium-heading h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 10px;
+    }
+
+    .podium-heading p {
+      color: #a89dc7;
+      font-size: 1rem;
+    }
+
+    /* The 3-card podium row: 2nd | 1st | 3rd */
+    .podium-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      align-items: end;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Each podium card */
+    .podium-card {
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.025) 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 28px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+      position: relative;
+      transition: transform 240ms ease, box-shadow 240ms ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .podium-card:hover {
+      transform: translateY(-4px);
+    }
+
+    /* Rank label at top of each card */
+    .podium-rank-label {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    /* 2nd place */
+    .podium-card.rank-2 {
+      padding-top: 28px;
+    }
+    .podium-card.rank-2 .podium-rank-label { color: #c0d8ff; }
+
+    /* 1st place — taller, golden glow */
+    .podium-card.rank-1 {
+      padding-top: 20px;
+      border-color: rgba(255, 184, 77, 0.35);
+      background: linear-gradient(180deg, rgba(255,212,100,0.14) 0%, rgba(255,140,60,0.07) 100%);
+      box-shadow: 0 0 48px rgba(255,184,77,0.18), 0 24px 48px rgba(0,0,0,0.3);
+      transform: translateY(-24px);
+    }
+    .podium-card.rank-1:hover {
+      transform: translateY(-28px);
+    }
+    .podium-card.rank-1 .podium-rank-label {
+      color: #ffd66b;
+      font-size: 1.25rem;
+      text-shadow: 0 0 16px rgba(255,184,77,0.5);
+    }
+
+    /* 3rd place */
+    .podium-card.rank-3 {
+      padding-top: 28px;
+    }
+    .podium-card.rank-3 .podium-rank-label { color: #ffb38a; }
+
+    /* Crown icon above rank-1 avatar */
+    .podium-crown {
+      font-size: 2.6rem;
+      line-height: 1;
+      margin-bottom: -6px;
+      filter: drop-shadow(0 0 12px rgba(255,184,77,0.7));
+      animation: crown-float 2.4s ease-in-out infinite;
+    }
+
+    @keyframes crown-float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-5px); }
+    }
+
+    /* Avatar inside podium card */
+    .podium-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.15);
+      background: #2e1060;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .podium-card.rank-1 .podium-avatar {
+      width: 110px;
+      height: 110px;
+      border-color: #ffd66b;
+      border-width: 3px;
+      box-shadow: 0 0 24px rgba(255,184,77,0.4);
+    }
+
+    .podium-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Player name */
+    .podium-name {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .podium-card.rank-1 .podium-name {
+      font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+    }
+
+    /* Score */
+    .podium-score {
+      font-family: "Manrope", sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #ffd66b;
+      letter-spacing: 0.04em;
+    }
+
+    .podium-card.rank-2 .podium-score { color: #c0d8ff; }
+    .podium-card.rank-3 .podium-score { color: #ffb38a; }
+
+    .podium-time {
+      font-size: 0.78rem;
+      color: #907fa8;
+      margin-top: -4px;
+    }
+
+    /* Empty podium slot */
+    .podium-card.is-empty {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .podium-card.is-empty .podium-name {
+      color: #ffffff55;
+    }
+
+    /* ── Rest-of-list (rank 4+) ── */
+    .rest-section {
+      padding: 0 0 64px;
+    }
+
+    .rest-heading {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .rest-heading h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
+      font-weight: 700;
+      color: #c8b5ea;
+      margin: 0;
+    }
+
+    /* Rest list */
+    .rest-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .rest-item {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid rgba(255,255,255,0.07);
+      transition: background 200ms ease, border-color 200ms ease;
+    }
+
+    .rest-item:hover {
+      background: linear-gradient(180deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.04) 100%);
+      border-color: rgba(255,255,255,0.13);
+    }
+
+    .rest-rank {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #6b5c88;
+      text-align: center;
+    }
+
+    .rest-player {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .rest-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #2e1060;
+      border: 1px solid rgba(255,255,255,0.12);
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .rest-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rest-player-name {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e2d8f5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rest-stats {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .rest-score {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #ffd66b;
+    }
+
+    .rest-time {
+      font-size: 0.74rem;
+      color: #7a6a96;
+    }
+
+    .rest-empty {
+      text-align: center;
+      padding: 24px;
+      color: #7a6a96;
+      font-size: 0.9rem;
+    }
+
+    .podium-section {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .podium-section::before,
+    .podium-section::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: -2;
+      filter: blur(10px);
+    }
+
+    .podium-section::before {
+      width: 360px;
+      height: 360px;
+      top: 24px;
+      left: -110px;
+      background: radial-gradient(circle, rgba(255, 212, 102, 0.24) 0%, rgba(255, 212, 102, 0) 72%);
+      animation: podium-aurora 8s ease-in-out infinite;
+    }
+
+    .podium-section::after {
+      width: 320px;
+      height: 320px;
+      right: -90px;
+      bottom: 10px;
+      background: radial-gradient(circle, rgba(124, 92, 255, 0.24) 0%, rgba(124, 92, 255, 0) 72%);
+      animation: podium-aurora 10s ease-in-out infinite reverse;
+    }
+
+    .podium-backdrop {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .podium-backdrop::before {
+      content: "";
+      position: absolute;
+      inset: 28px 8% 0;
+      border-radius: 32px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+        radial-gradient(circle at top, rgba(255, 214, 107, 0.14), transparent 44%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .podium-sparkles,
+    .podium-burst {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .podium-sparkles {
+      background-image:
+        radial-gradient(circle at 14% 22%, rgba(255, 214, 107, 0.9) 0 2px, transparent 2.5px),
+        radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.78) 0 1.5px, transparent 2px),
+        radial-gradient(circle at 24% 76%, rgba(255, 160, 122, 0.75) 0 2px, transparent 2.5px),
+        radial-gradient(circle at 74% 70%, rgba(192, 216, 255, 0.72) 0 2px, transparent 2.5px),
+        radial-gradient(circle at 54% 10%, rgba(255, 214, 107, 0.7) 0 1.5px, transparent 2px);
+      opacity: 0.65;
+      animation: sparkle-drift 9s linear infinite;
+    }
+
+    .podium-burst {
+      overflow: hidden;
+    }
+
+    .podium-beam {
+      position: absolute;
+      bottom: 90px;
+      width: 200px;
+      height: 320px;
+      border-radius: 999px 999px 24px 24px;
+      transform-origin: bottom center;
+      opacity: 0.22;
+      filter: blur(2px);
+      mix-blend-mode: screen;
+    }
+
+    .podium-beam.left {
+      left: 18%;
+      transform: rotate(-12deg);
+      background: linear-gradient(180deg, rgba(192, 216, 255, 0.58), rgba(192, 216, 255, 0));
+      animation: beam-sway-left 7s ease-in-out infinite;
+    }
+
+    .podium-beam.center {
+      left: 50%;
+      transform: translateX(-50%);
+      width: 240px;
+      height: 360px;
+      opacity: 0.28;
+      background: linear-gradient(180deg, rgba(255, 214, 107, 0.7), rgba(255, 214, 107, 0));
+      animation: beam-pulse 4.6s ease-in-out infinite;
+    }
+
+    .podium-beam.right {
+      right: 18%;
+      transform: rotate(12deg);
+      background: linear-gradient(180deg, rgba(255, 179, 138, 0.55), rgba(255, 179, 138, 0));
+      animation: beam-sway-right 7s ease-in-out infinite;
+    }
+
+    .podium-row {
+      position: relative;
+    }
+
+    .podium-card {
+      overflow: hidden;
+    }
+
+    .podium-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent 42%);
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .podium-card::after {
+      content: "";
+      position: absolute;
+      inset: auto 12% -36px;
+      height: 72px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0));
+      z-index: -1;
+    }
+
+    .podium-card.rank-1 {
+      animation: champion-float 4.5s ease-in-out infinite;
+    }
+
+    .podium-card.is-celebrating {
+      animation: podium-celebrate 800ms ease;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      width: 10px;
+      height: 16px;
+      border-radius: 3px;
+      opacity: 0.95;
+      will-change: transform, opacity;
+      animation: confetti-fall var(--fall-duration, 1400ms) ease-out forwards;
+    }
+
+    .confetti-piece.square {
+      border-radius: 2px;
+    }
+
+    .confetti-piece.ribbon {
+      width: 6px;
+      height: 22px;
+      border-radius: 999px;
+    }
+
+    @keyframes podium-aurora {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(14px, -10px, 0) scale(1.08); }
+    }
+
+    @keyframes sparkle-drift {
+      0% { transform: translateY(0); opacity: 0.42; }
+      50% { transform: translateY(-8px); opacity: 0.78; }
+      100% { transform: translateY(0); opacity: 0.42; }
+    }
+
+    @keyframes beam-sway-left {
+      0%, 100% { transform: rotate(-12deg) scaleY(1); opacity: 0.18; }
+      50% { transform: rotate(-7deg) scaleY(1.06); opacity: 0.28; }
+    }
+
+    @keyframes beam-sway-right {
+      0%, 100% { transform: rotate(12deg) scaleY(1); opacity: 0.16; }
+      50% { transform: rotate(7deg) scaleY(1.06); opacity: 0.26; }
+    }
+
+    @keyframes beam-pulse {
+      0%, 100% { transform: translateX(-50%) scaleY(1); opacity: 0.22; }
+      50% { transform: translateX(-50%) scaleY(1.08); opacity: 0.34; }
+    }
+
+    @keyframes champion-float {
+      0%, 100% { transform: translateY(-24px); }
+      50% { transform: translateY(-31px); }
+    }
+
+    @keyframes podium-celebrate {
+      0% { transform: translateY(-24px) scale(1); }
+      35% { transform: translateY(-34px) scale(1.02); }
+      70% { transform: translateY(-21px) scale(0.995); }
+      100% { transform: translateY(-24px) scale(1); }
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translate3d(var(--x-start, 0), var(--y-start, 0), 0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate3d(var(--x-end, 0), var(--y-end, 360px), 0) rotate(var(--rotation, 240deg));
+        opacity: 0;
+      }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 620px) {
+      .podium-row {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+        gap: 14px;
+      }
+
+      .podium-card.rank-1 {
+        transform: none;
+        order: -1;
+        border-color: rgba(255,184,77,0.35);
+      }
+
+      .podium-card.rank-1:hover {
+        transform: translateY(-4px);
+      }
+
+      .podium-card.rank-2 { order: 0; }
+      .podium-card.rank-3 { order: 1; }
+    }
+    @media (max-width: 620px) {
+      .podium-section::before,
+      .podium-section::after {
+        width: 220px;
+        height: 220px;
+      }
+
+      .podium-backdrop::before {
+        inset: 20px 4% 0;
+      }
+
+      .podium-beam {
+        width: 130px;
+        height: 220px;
+        bottom: 40px;
+      }
+
+      .podium-beam.center {
+        width: 160px;
+        height: 240px;
+      }
+
+      .podium-card.rank-1 {
+        animation: none;
+      }
+
+      .podium-card.is-celebrating {
+        animation: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .podium-section::before,
+      .podium-section::after,
+      .podium-sparkles,
+      .podium-beam,
+      .podium-crown,
+      .podium-card.rank-1,
+      .podium-card.is-celebrating,
+      .confetti-piece {
+        animation: none !important;
+      }
+    }
+  </style>
+
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -40,7 +635,7 @@
       <nav class="site-nav" id="resultsNav" data-nav-menu>
         <a href="index.html">Home</a>
         <a href="mouse-sim.html">Play Demo</a>
-        <a href="#resultsTable">Leaderboard</a>
+        <a href="#podiumSection">Leaderboard</a>
         <a href="contact.html">Order Console</a>
         <a href="admin.html" class="nav-circle-btn" title="Admin Panel">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -58,12 +653,58 @@
         <p class="eyebrow">Dedicated display mode</p>
         <h1>Live results for the whole room.</h1>
         <p>
-          Stay locked into the action with real-time leaderboard updates, showing player rankings instantly as each SmartWarm challenge is completed.
+          Real-time leaderboard updates, showing player rankings instantly as each SmartWarm challenge is completed.
         </p>
         <div class="results-meta">
-          <span>Auto-sorted by fastest time</span>
+          <span>Auto-sorted by score</span>
           <span>Realtime Firebase updates</span>
           <span>Responsive event display</span>
+        </div>
+      </section>
+
+      <!-- ── PODIUM ── -->
+      <section class="podium-section" id="podiumSection">
+        <div class="podium-backdrop" aria-hidden="true">
+          <div class="podium-sparkles"></div>
+          <div class="podium-beam left"></div>
+          <div class="podium-beam center"></div>
+          <div class="podium-beam right"></div>
+          <div class="podium-burst" id="podiumBurst"></div>
+        </div>
+        <div class="podium-heading">
+          <p class="eyebrow">Top performers</p>
+          <h2>Hall of Champions</h2>
+          <p>The top three stand above the rest.</p>
+        </div>
+
+        <div class="podium-row" id="podiumRow">
+          <!-- Rank 2 (left) -->
+          <div class="podium-card rank-2 is-empty" id="podium2">
+            <div class="podium-rank-label">Rank 2</div>
+            <div class="podium-avatar" id="podiumAvatar2">2</div>
+            <div class="podium-name" id="podiumName2">—</div>
+            <div class="podium-score" id="podiumScore2">—</div>
+            <div class="podium-time" id="podiumTime2"></div>
+          </div>
+
+          <!-- Rank 1 (center, elevated) -->
+          <div class="podium-card rank-1 is-empty" id="podium1">
+            <div class="podium-crown">👑</div>
+            <div class="podium-rank-label">Rank 1</div>
+            <div class="podium-avatar" id="podiumAvatar1">1</div>
+            <div class="podium-name" id="podiumName1">—</div>
+            <div class="podium-score" id="podiumScore1">—</div>
+            <div class="podium-time" id="podiumTime1"></div>
+          </div>
+
+          <!-- Rank 3 (right) -->
+          <div class="podium-card rank-3 is-empty" id="podium3">
+            <div class="podium-rank-label">Rank 3</div>
+            <div class="podium-avatar" id="podiumAvatar3">3</div>
+            <div class="podium-name" id="podiumName3">—</div>
+            <div class="podium-score" id="podiumScore3">—</div>
+            <div class="podium-time" id="podiumTime3"></div>
+          </div>
         </div>
       </section>
 
@@ -99,79 +740,296 @@
     </main>
   </div>
 
-  <script>
-    const { database: db, signInAnonymously } = window.smartWarmFirebase;
-    const resultTable = document.getElementById("resultTable");
+<script>
+const { database: db, signInAnonymously } = window.smartWarmFirebase;
+const resultTable = document.getElementById("resultTable");
+const podiumBurst = document.getElementById("podiumBurst");
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let previousPodiumSignature = "";
 
-    signInAnonymously()
-      .then(() => {
-        db.ref("gameResults").on("value", (snapshot) => {
-          const data = snapshot.val();
 
-          if (!data) {
-            resultTable.innerHTML = '<tr><td colspan="8" class="empty-state">Waiting for results...</td></tr>';
-            return;
-          }
+// =======================
+// ✅ SAVE DATA FUNCTION
+// =======================
+function saveResult(data) {
+  db.ref("gameResults").push(data)
+    .then(() => console.log("✅ Data saved"))
+    .catch(err => console.error("❌ Save failed:", err));
+}
 
-          const resultsArray = Object.entries(data)
-            .map(([key, value]) => ({ key, ...value }))
-            .sort((a, b) => {
-              const scoreDiff = (Number(b.score) || 0) - (Number(a.score) || 0);
-              if (scoreDiff !== 0) return scoreDiff;
-              return (Number(a.timeTaken) || 0) - (Number(b.timeTaken) || 0);
-            });
+function celebratePodium() {
+  if (!podiumBurst || prefersReducedMotion.matches) return;
 
-          resultTable.innerHTML = resultsArray.map((item, index) => {
-            const playerName = item.playerName ?? item.name ?? "Unknown";
-            const playerImage = item.playerImage ?? item.image ?? "";
-            const timeTaken = Number(item.timeTaken);
-            const score = item.score ?? 0;
-            const avgReactionTime = item.avgReactionTime ?? 0;
-            const stage = item.stage ?? 1;
-            const bestStreak = item.bestStreak ?? 0;
+  const colors = ["#ffd66b", "#ff8f5a", "#7cc7ff", "#ffffff", "#ff5fa2"];
+  const shapes = ["square", "ribbon"];
+  const pieces = 48;
 
-            const pills = [];
-            if (item.timeCutSeconds > 0) pills.push('<span class="power-pill pill-time">-5S</span>');
-            if (item.usedDoublePoints) pills.push('<span class="power-pill pill-x2">x2</span>');
-            if (item.usedOnePointFivePoints) pills.push('<span class="power-pill pill-x1_5">x1.5</span>');
-            if (item.usedShield) pills.push('<span class="power-pill pill-shield">SHIELD</span>');
-            if (item.usedSpeedBoost) pills.push('<span class="power-pill pill-speed">BOOST</span>');
-            if (pills.length === 0) pills.push('<span class="power-pill pill-none">PURE RUN</span>');
+  podiumBurst.innerHTML = "";
 
-            const imageMarkup = playerImage
-              ? `<img src="${playerImage}" alt="${playerName}">`
-              : `<div class="player-avatar-fallback" aria-hidden="true">${playerName.charAt(0).toUpperCase()}</div>`;
+  for (let i = 0; i < pieces; i += 1) {
+    const piece = document.createElement("span");
+    piece.className = `confetti-piece ${shapes[i % shapes.length]}`;
+    piece.style.background = colors[i % colors.length];
+    piece.style.left = `${12 + Math.random() * 76}%`;
+    piece.style.setProperty("--x-start", `${Math.round((Math.random() - 0.5) * 28)}px`);
+    piece.style.setProperty("--x-end", `${Math.round((Math.random() - 0.5) * 240)}px`);
+    piece.style.setProperty("--y-start", `${Math.round(Math.random() * 28)}px`);
+    piece.style.setProperty("--y-end", `${300 + Math.round(Math.random() * 140)}px`);
+    piece.style.setProperty("--rotation", `${160 + Math.round(Math.random() * 320)}deg`);
+    piece.style.setProperty("--fall-duration", `${1100 + Math.round(Math.random() * 800)}ms`);
+    piece.style.animationDelay = `${Math.random() * 220}ms`;
+    podiumBurst.appendChild(piece);
+  }
 
-            return `
-              <tr>
-                <td>${index + 1}</td>
-                <td>
-                  <div class="player-cell">
-                    ${imageMarkup}
-                    <div>
-                      <strong>${playerName}</strong>
-                    </div>
-                  </div>
-                </td>
-                <td><strong>${score}</strong></td>
-                <td>${Number.isFinite(timeTaken) ? `${timeTaken}s` : "-"}</td>
-                <td>${avgReactionTime > 0 ? `${avgReactionTime}ms` : "-"}</td>
-                <td>Stage ${stage}</td>
-                <td><div class="power-pills">${pills.join("")}</div></td>
-                <td>${bestStreak}</td>
-              </tr>
-            `;
-          }).join("");
-        }, (error) => {
-          console.error("FAILED", error);
-          resultTable.innerHTML = '<tr><td colspan="8" class="empty-state">Failed to load results.</td></tr>';
+  const championCard = document.getElementById("podium1");
+  championCard?.classList.remove("is-celebrating");
+  void championCard?.offsetWidth;
+  championCard?.classList.add("is-celebrating");
+
+  window.clearTimeout(celebratePodium.cleanupTimer);
+  celebratePodium.cleanupTimer = window.setTimeout(() => {
+    podiumBurst.innerHTML = "";
+    championCard?.classList.remove("is-celebrating");
+  }, 2400);
+}
+
+
+// =======================
+// 🧪 TEST (boleh buang nanti)
+// =======================
+// Uncomment kalau nak test manual
+/*
+saveResult({
+  playerName: "Test Player",
+  score: Math.floor(Math.random() * 100),
+  timeTaken: Math.floor(Math.random() * 10),
+  avgReactionTime: 200,
+  stage: 1,
+  bestStreak: 5
+});
+*/
+
+
+// =======================
+// 🎖️ PODIUM FUNCTION
+// =======================
+function fillPodiumSlot(rank, item) {
+  const card     = document.getElementById(`podium${rank}`);
+  const avatarEl = document.getElementById(`podiumAvatar${rank}`);
+  const nameEl   = document.getElementById(`podiumName${rank}`);
+  const scoreEl  = document.getElementById(`podiumScore${rank}`);
+  const timeEl   = document.getElementById(`podiumTime${rank}`);
+
+  // ✅ CHECK NULL
+  if (!item) {
+    card.classList.add("is-empty");
+    nameEl.textContent  = "—";
+    scoreEl.textContent = "—";
+    timeEl.innerHTML    = "";
+    avatarEl.innerHTML  = rank.toString();
+    return;
+  }
+
+  const name  = item.playerName ?? item.name ?? "Unknown";
+  const streak = item.bestStreak ?? 0;
+  const score = item.score ?? 0;
+  const time  = Number(item.timeTaken);
+  const image = item.playerImage ?? item.image ?? "";
+
+  // ✅ POWER BADGES (BETUL)
+  const pills = [];
+
+  if (item.usedDoublePoints) pills.push(`
+    <div class="power-card pill-x2">⚡ x2</div>
+  `);
+
+  if (item.usedOnePointFivePoints) pills.push(`
+    <div class="power-card pill-x1_5">🔥 x1.5</div>
+  `);
+
+  if (item.usedShield) pills.push(`
+    <div class="power-card pill-shield">🛡️ Shield</div>
+  `);
+
+  if (item.usedSpeedBoost) pills.push(`
+    <div class="power-card pill-speed">💨 Boost</div>
+  `);
+
+  if (item.timeCutSeconds > 0) pills.push(`
+    <div class="power-card pill-time">⏱️ -5s</div>
+  `);
+
+  if (pills.length === 0) pills.push(`
+    <div class="power-card pill-none">Pure</div>
+  `);
+
+  card.classList.remove("is-empty");
+
+  // ✅ NAME + BADGE
+  nameEl.innerHTML = `
+    <div>${name}</div>
+    <div class="power-pills">${pills.join("")}</div>
+  `;
+  scoreEl.innerHTML = `
+  ${score} pts
+  ${streak > 0 ? `<div style="font-size:12px;color:#ff9800;">🔥 Streak ${streak}</div>` : ""}
+`;
+  timeEl.textContent  = Number.isFinite(time) ? `${time}s` : "";
+
+  // ✅ IMAGE
+  if (image) {
+    avatarEl.innerHTML = `
+  <div class="avatar-wrapper">
+    ${streak > 0 ? `<div class="streak-fire">🔥 ${streak}</div>` : ""}
+    <img src="${image}" alt="${name}">
+  </div>
+`;
+  } else {
+    avatarEl.innerHTML = `<span>${name.charAt(0).toUpperCase()}</span>`;
+  }
+}
+
+
+// =======================
+// 🏆 TABLE FUNCTION
+// =======================
+function buildTable(resultsArray) {
+  if (!resultsArray.length) {
+    resultTable.innerHTML = '<tr><td colspan="8">No data</td></tr>';
+    return;
+  }
+
+  resultTable.innerHTML = resultsArray.map((item, index) => {
+    const playerName = item.playerName ?? item.name ?? "Unknown";
+    const playerImage = item.playerImage ?? item.image ?? "";
+    const timeTaken = Number(item.timeTaken);
+    const score = item.score ?? 0;
+    const avgReactionTime = item.avgReactionTime ?? 0;
+    const stage = item.stage ?? 1;
+    const bestStreak = item.bestStreak ?? 0;
+
+    // ✅ POWER SYSTEM (FIXED)
+const pills = [];
+
+if (item.timeCutSeconds > 0) pills.push(`
+  <div class="power-card pill-time">
+    <span>⏱️</span>
+    <small>-5s</small>
+  </div>
+`);
+
+if (item.usedDoublePoints) pills.push(`
+  <div class="power-card pill-x2">
+    <span>⚡</span>
+    <small>x2</small>
+  </div>
+`);
+
+if (item.usedOnePointFivePoints) pills.push(`
+  <div class="power-card pill-x1_5">
+    <span>🔥</span>
+    <small>x1.5</small>
+  </div>
+`);
+
+if (item.usedShield) pills.push(`
+  <div class="power-card pill-shield">
+    <span>🛡️</span>
+    <small>Shield</small>
+  </div>
+`);
+
+if (item.usedSpeedBoost) pills.push(`
+  <div class="power-card pill-speed">
+    <span>💨</span>
+    <small>Boost</small>
+  </div>
+`);
+
+if (pills.length === 0) pills.push(`
+  <div class="power-card pill-none">
+    <small>Pure</small>
+  </div>
+`);
+
+    // ✅ PROFILE IMAGE (FIXED)
+    const imageMarkup = playerImage
+      ? `<img src="${playerImage}" alt="${playerName}">`
+      : `<div class="player-avatar-fallback">${playerName.charAt(0).toUpperCase()}</div>`;
+
+    return `
+      <tr>
+        <td>${index + 4}</td>
+        <td>
+          <div class="player-cell">
+            ${imageMarkup}
+            <div>
+              <strong>${playerName}</strong>
+            </div>
+          </div>
+        </td>
+        <td><strong>${score}</strong></td>
+        <td>${Number.isFinite(timeTaken) ? `${timeTaken}s` : "-"}</td>
+        <td>${avgReactionTime > 0 ? `${avgReactionTime}ms` : "-"}</td>
+        <td>Stage ${stage}</td>
+        <td><div class="power-pills">${pills.join("")}</div></td>
+        <td>${bestStreak}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+
+// =======================
+// 🔥 MAIN FIREBASE
+// =======================
+signInAnonymously()
+  .then(() => {
+    db.ref("gameResults").on("value", (snapshot) => {
+      const data = snapshot.val();
+      console.log("🔥 DATA:", data);
+
+      if (!data) {
+        fillPodiumSlot(1, null);
+        fillPodiumSlot(2, null);
+        fillPodiumSlot(3, null);
+        previousPodiumSignature = "";
+        resultTable.innerHTML = '<tr><td colspan="8">Waiting...</td></tr>';
+        return;
+      }
+
+      const sorted = Object.entries(data)
+        .map(([key, value]) => ({ key, ...value }))
+        .sort((a, b) => {
+          const scoreDiff = (b.score || 0) - (a.score || 0);
+          if (scoreDiff !== 0) return scoreDiff;
+          return (a.timeTaken || 0) - (b.timeTaken || 0);
         });
-      })
-      .catch((error) => {
-        console.error("FAILED", error);
-        resultTable.innerHTML = '<tr><td colspan="8" class="empty-state">Firebase sign-in failed.</td></tr>';
-      });
-  </script>
+
+      // 🥇🥈🥉 Podium
+      const podiumSignature = sorted
+        .slice(0, 3)
+        .map((item) => `${item?.key ?? ""}:${item?.score ?? 0}:${item?.timeTaken ?? ""}`)
+        .join("|");
+
+      fillPodiumSlot(1, sorted[0]);
+      fillPodiumSlot(2, sorted[1]);
+      fillPodiumSlot(3, sorted[2]);
+
+      if (podiumSignature && podiumSignature !== previousPodiumSignature) {
+        celebratePodium();
+        previousPodiumSignature = podiumSignature;
+      }
+
+      // 📊 Table
+      buildTable(sorted.slice(3));
+    });
+  })
+  .catch((error) => {
+    console.error("❌ Firebase error:", error);
+  });
+
+</script>
 </body>
 
 </html>

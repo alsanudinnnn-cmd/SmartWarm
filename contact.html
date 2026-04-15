@@ -21,8 +21,19 @@
     .contact-hero {
       text-align: center;
       padding: 48px 24px;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
     }
+
+    .contact-eyebrow {
+      display: inline-flex;
+      margin-bottom: 16px;
+      color: #f1baff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
     .contact-hero h1 {
       font-family: "Space Grotesk", sans-serif;
       font-size: clamp(2.4rem, 5vw, 4rem);
@@ -39,20 +50,164 @@
       line-height: 1.6;
       font-size: 1.05rem;
     }
-    
-    .contact-container {
-      max-width: 580px;
-      margin: 0 auto 60px;
-      padding: 40px;
+
+    .contact-highlights {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin: 0 auto 24px;
+    }
+
+    .contact-highlight,
+    .contact-card,
+    .contact-form-card {
       border-radius: var(--radius-xl);
       border: 1px solid var(--line);
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)), var(--surface);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+        var(--surface);
       backdrop-filter: blur(24px);
       box-shadow: var(--shadow);
     }
 
+    .contact-highlight {
+      padding: 20px 22px;
+    }
+
+    .contact-highlight strong,
+    .contact-card h2,
+    .contact-form-card h2,
+    .info-list strong {
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .contact-highlight strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.2rem;
+      color: #fff;
+    }
+
+    .contact-highlight span {
+      display: block;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.96rem;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.1fr);
+      gap: 24px;
+      margin-bottom: 60px;
+      align-items: stretch;
+    }
+
+    .contact-stack {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 20px;
+      height: 100%;
+    }
+
+    .contact-stack .contact-card:last-child {
+      height: 100%;
+    }
+
+    .contact-card {
+      padding: 28px;
+    }
+
+    .contact-card h2,
+    .contact-form-card h2 {
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .contact-card p,
+    .contact-form-card p,
+    .info-list li,
+    .contact-mini-note {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .contact-form-card {
+      padding: 36px 40px 40px;
+    }
+
+    .price-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0 18px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(255, 212, 122, 0.12);
+      border: 1px solid rgba(255, 212, 122, 0.26);
+      color: #ffe2a4;
+      font-weight: 700;
+    }
+
+    .price-pill strong {
+      font-size: 1.1rem;
+      color: #fff3d1;
+    }
+
+    .info-list {
+      list-style: none;
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+      padding: 0;
+    }
+
+    .info-list li {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .info-list strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .contact-note {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(94, 234, 212, 0.08);
+      border: 1px solid rgba(94, 234, 212, 0.18);
+    }
+
+    .contact-note strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #dcfffa;
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .contact-form-intro {
+      margin-bottom: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
     .form-group {
       margin-bottom: 24px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
     }
 
     .form-group label {
@@ -63,7 +218,9 @@
       color: #f6ddff;
     }
 
-    .form-group input {
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
       width: 100%;
       padding: 16px 20px;
       border-radius: 12px;
@@ -75,15 +232,52 @@
       transition: all 200ms ease;
     }
 
-    .form-group input:focus {
+    .form-group textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
       outline: none;
       border-color: rgba(94, 234, 212, 0.6);
       box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.15);
       background: rgba(10, 2, 20, 0.6);
     }
 
-    .form-group input::placeholder {
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
       color: rgba(200, 181, 234, 0.4);
+    }
+
+    .submit-row {
+      display: grid;
+      gap: 12px;
+    }
+
+    .inquiry-visual {
+      margin-top: 18px;
+      width: 100%;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(10, 2, 20, 0.35);
+      box-shadow: 0 14px 30px rgba(6, 1, 14, 0.28);
+      aspect-ratio: 1 / 1;
+    }
+
+    .inquiry-visual img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0.92;
+    }
+
+    .contact-mini-note {
+      font-size: 0.92rem;
     }
 
     .submit-btn {
@@ -105,6 +299,34 @@
       transform: translateY(-2px);
       box-shadow: 0 16px 36px rgba(20, 184, 166, 0.4);
       background: linear-gradient(180deg, #ccfbf1, #5eead4);
+    }
+
+    .contact-faq {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+
+    .faq-card {
+      padding: 22px;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)), var(--surface);
+      backdrop-filter: blur(24px);
+      box-shadow: var(--shadow);
+    }
+
+    .faq-card h3 {
+      margin-bottom: 8px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.05rem;
+      color: #fff;
+    }
+
+    .faq-card p {
+      color: var(--muted);
+      line-height: 1.6;
     }
 
     /* Success Toast */
@@ -135,10 +357,29 @@
     }
 
     @media (max-width: 640px) {
-      .contact-container {
-        margin: 0 16px 40px;
+      .contact-hero {
+        padding: 34px 12px 20px;
+      }
+
+      .contact-form-card {
         padding: 28px 20px;
       }
+
+      .contact-card,
+      .faq-card,
+      .contact-highlight {
+        padding: 22px 18px;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .contact-highlights,
+      .contact-grid,
+      .contact-faq,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
     }
   </style>
 </head>
@@ -181,29 +422,139 @@
 
     <main>
       <section class="contact-hero">
+        <p class="contact-eyebrow">Order SmartWarm</p>
         <h1>Experience the thrill.</h1>
-        <p>Take your reaction skills to the next level with SmartWarm. Order your LED console today and experience a fast, responsive, and interactive challenge built for modern gameplay. With precision-based input and real-time feedback, SmartWarm transforms every session into an exciting test of speed, focus, and consistency right from the comfort of your own space.</p>
+        <p>Bring the SmartWarm experience into your own event, activation, school, showroom, or promo setup. Share a few details below and we will follow up with the best next step for your order.</p>
       </section>
 
-      <section class="contact-container">
-        <form id="purchaseForm">
-          <div class="form-group">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" placeholder="Enter your full name" required autocomplete="name">
-          </div>
-          
-          <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone" placeholder="e.g. +1 234 567 8900" required autocomplete="tel">
+      <section class="contact-highlights">
+        <article class="contact-highlight">
+          <strong>From RM320.00</strong>
+          <span>Simple starting point for customers who want the SmartWarm experience without a complicated setup process.</span>
+        </article>
+        <article class="contact-highlight">
+          <strong>Malaysia-ready</strong>
+          <span>Suitable for local activations, school programs, roadshows, and event booths across Malaysia.</span>
+        </article>
+        <article class="contact-highlight">
+          <strong>Fast follow-up</strong>
+          <span>Send your inquiry and we will review your needs, usage type, and next-step recommendation.</span>
+        </article>
+      </section>
+
+      <section class="contact-grid">
+        <div class="contact-stack">
+          <article class="contact-card">
+            <h2>What you can expect</h2>
+            <p>SmartWarm is designed to be easy to understand for players and easy to run for hosts. It works especially well in spaces where speed, excitement, and attention matter.</p>
+            <div class="price-pill">
+              <span>Starting price</span>
+              <strong>RM320.00</strong>
+            </div>
+            <ul class="info-list">
+              <li>
+                <strong>Best for events and activations</strong>
+                Interactive gameplay that attracts attention and keeps players engaged.
+              </li>
+              <li>
+                <strong>Great for schools and showcases</strong>
+                A simple reaction-based format that feels fun, competitive, and easy to run.
+              </li>
+              <li>
+                <strong>Built for quick onboarding</strong>
+                Players can jump in fast, while hosts can still track results and standings.
+              </li>
+            </ul>
+          </article>
+
+          <article class="contact-card">
+            <h2>What happens next</h2>
+            <ul class="info-list">
+              <li>
+                <strong>1. We review your inquiry</strong>
+                We look at your use case, audience, and event size.
+              </li>
+              <li>
+                <strong>2. We suggest the right setup</strong>
+                You get a clearer recommendation based on your goals and usage.
+              </li>
+              <li>
+                <strong>3. We confirm the order details</strong>
+                Final coordination can include timing, availability, and any special notes.
+              </li>
+            </ul>
+            <div class="contact-note">
+              <strong>Service area note</strong>
+              <p class="contact-mini-note">This page is set up for Malaysia-based inquiries and pricing. If you need a specific delivery or event location, include it in the message field below.</p>
+            </div>
+          </article>
+        </div>
+
+        <section class="contact-form-card">
+          <div class="contact-form-intro">
+            <h2>Send your order inquiry</h2>
+            <p>Tell us who you are, how you plan to use SmartWarm, and any location or event details that would help us follow up properly.</p>
           </div>
 
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="e.g. hello@example.com" required autocomplete="email">
-          </div>
+          <form id="purchaseForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your full name" required autocomplete="name">
+              </div>
 
-          <button type="submit" class="submit-btn" id="submitBtn">Order Now</button>
-        </form>
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="e.g. +60 12-345 6789" required autocomplete="tel">
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="e.g. hello@example.com" required autocomplete="email">
+              </div>
+
+              <div class="form-group">
+                <label for="useCase">Use Case</label>
+                <select id="useCase" name="useCase">
+                  <option value="">Select one</option>
+                  <option value="event">Event or roadshow</option>
+                  <option value="school">School or education</option>
+                  <option value="showroom">Showroom or retail</option>
+                  <option value="personal">Personal setup</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group full">
+                <label for="message">Project Details</label>
+                <textarea id="message" name="message" placeholder="Tell us your event date, location, expected audience, or anything else we should know."></textarea>
+              </div>
+            </div>
+
+            <div class="submit-row">
+              <button type="submit" class="submit-btn" id="submitBtn">Send Inquiry</button>
+              <p class="contact-mini-note">By sending this form, you are asking for a follow-up about SmartWarm ordering, pricing, or availability.</p>
+            </div>
+          </form>
+          <div class="inquiry-visual">
+            <img src="Product.png" alt="SmartWarm product visual">
+          </div>
+        </section>
+      </section>
+
+      <section class="contact-faq">
+        <article class="faq-card">
+          <h3>Is this only for large events?</h3>
+          <p>No. SmartWarm can fit smaller showcases, school activities, and compact activations too.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Can I ask about custom needs?</h3>
+          <p>Yes. Use the project details field to share setup goals, timing, or venue-specific requirements.</p>
+        </article>
+        <article class="faq-card">
+          <h3>Do I need to know everything before contacting?</h3>
+          <p>Not at all. A basic inquiry is enough to start the conversation and get guidance on the right next step.</p>
+        </article>
       </section>
     </main>
   </div>
@@ -233,6 +584,8 @@
       const nameVal = document.getElementById('name').value.trim();
       const phoneVal = document.getElementById('phone').value.trim();
       const emailVal = document.getElementById('email').value.trim();
+      const useCaseVal = document.getElementById('useCase').value;
+      const messageVal = document.getElementById('message').value.trim();
 
       if (!nameVal || !phoneVal || !emailVal) return;
 
@@ -246,6 +599,8 @@
         name: nameVal,
         phone: phoneVal,
         email: emailVal,
+        useCase: useCaseVal,
+        message: messageVal,
         timestamp: firebase.database.ServerValue.TIMESTAMP
       }).then(() => {
         // Show success toast

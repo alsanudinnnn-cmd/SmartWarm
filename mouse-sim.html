@@ -98,6 +98,7 @@
       gap: 22px;
       padding: 30px;
       margin-bottom: 22px;
+      animation: demo-rise 620ms cubic-bezier(.22, .92, .2, 1) both;
     }
 
     .eyebrow {
@@ -192,6 +193,7 @@
     .game-panel,
     .score-panel {
       padding: 28px;
+      animation: demo-rise 720ms cubic-bezier(.22, .92, .2, 1) both;
     }
 
     .panel-head {
@@ -388,6 +390,7 @@
       display: grid;
       align-content: start;
       gap: 16px;
+      animation-delay: 100ms;
     }
 
     .score-card {
@@ -395,12 +398,23 @@
       border-radius: 22px;
       background: var(--panel-muted);
       border: 1px solid var(--line);
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .score-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.16);
+      box-shadow: 0 14px 28px rgba(8, 2, 18, 0.18);
     }
 
     .score-card strong {
       display: block;
       margin-bottom: 8px;
       font-size: clamp(1.8rem, 4vw, 2.8rem);
+    }
+
+    .score-card strong.is-updating {
+      animation: stat-bump 280ms ease;
     }
 
     .score-card span {
@@ -437,6 +451,50 @@
 
       100% {
         transform: translateX(0);
+      }
+    }
+
+    @keyframes demo-rise {
+      from {
+        opacity: 0;
+        transform: translateY(22px) scale(0.985);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes stat-bump {
+      0% {
+        transform: translateY(0) scale(1);
+        filter: none;
+      }
+
+      45% {
+        transform: translateY(-3px) scale(1.04);
+        filter: drop-shadow(0 0 18px rgba(255, 196, 87, 0.3));
+      }
+
+      100% {
+        transform: translateY(0) scale(1);
+        filter: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero,
+      .game-panel,
+      .score-panel,
+      .score-card strong.is-updating {
+        animation: none !important;
+      }
+
+      .score-card,
+      .score-card:hover {
+        transition: none !important;
+        transform: none !important;
       }
     }
 
@@ -505,6 +563,16 @@
       background: linear-gradient(180deg, #fff, #ffd47a);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+
+    .promo-price {
+      margin: -2px 0 18px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #ffd47a;
+      letter-spacing: 0.03em;
+      text-shadow: 0 0 20px rgba(255, 196, 87, 0.28);
     }
 
     .promo-note {
@@ -796,6 +864,7 @@
         <span>Demo Day Promo</span>
       </div>
       <h3>Love the demo?</h3>
+      <div class="promo-price">RM320.00</div>
       <p>Experience the thrill in real life. Order your SmartWarm LED console today and challenge your friends!</p>
       <p class="promo-note">Claim an exclusive 15% event discount when you place your order after trying the demo.</p>
       <div class="promo-actions">
@@ -831,16 +900,73 @@
     let roundStartedAt = 0;
     let roundTimer = null;
     let nextLightTimer = null;
+    const statAnimations = new WeakMap();
 
-    function updateStats() {
+    function animateMetric(element, nextValue, { suffix = "", decimals = 0, immediate = false } = {}) {
+      if (!element) return;
+
+      const currentValue = Number(element.dataset.value ?? 0);
+      const safeValue = Number.isFinite(nextValue) ? nextValue : 0;
+
+      if (immediate) {
+        element.dataset.value = String(safeValue);
+        element.textContent = `${decimals > 0 ? safeValue.toFixed(decimals) : Math.round(safeValue)}${suffix}`;
+        return;
+      }
+
+      if (currentValue === safeValue) {
+        element.textContent = `${decimals > 0 ? safeValue.toFixed(decimals) : Math.round(safeValue)}${suffix}`;
+        return;
+      }
+
+      const existingFrame = statAnimations.get(element);
+      if (existingFrame) {
+        cancelAnimationFrame(existingFrame);
+      }
+
+      element.classList.remove("is-updating");
+      void element.offsetWidth;
+      element.classList.add("is-updating");
+
+      const startValue = currentValue;
+      const startTime = performance.now();
+      const duration = 240;
+
+      const render = (value) => {
+        element.textContent = `${decimals > 0 ? value.toFixed(decimals) : Math.round(value)}${suffix}`;
+      };
+
+      const step = (now) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = startValue + (safeValue - startValue) * eased;
+        render(value);
+
+        if (progress < 1) {
+          statAnimations.set(element, requestAnimationFrame(step));
+          return;
+        }
+
+        element.dataset.value = String(safeValue);
+        render(safeValue);
+        statAnimations.delete(element);
+      };
+
+      statAnimations.set(element, requestAnimationFrame(step));
+      window.setTimeout(() => {
+        element.classList.remove("is-updating");
+      }, 280);
+    }
+
+    function updateStats(immediate = false) {
       const attempts = hits + misses;
       const accuracy = attempts ? Math.round((hits / attempts) * 100) : 0;
       const averageReaction = hits ? Math.round(totalReaction / hits) : 0;
 
-      scoreValue.textContent = String(score);
-      accuracyValue.textContent = `${accuracy}%`;
-      streakValue.textContent = String(streak);
-      reactionValue.textContent = `${averageReaction} ms`;
+      animateMetric(scoreValue, score, { immediate });
+      animateMetric(accuracyValue, accuracy, { suffix: "%", immediate });
+      animateMetric(streakValue, streak, { immediate });
+      animateMetric(reactionValue, averageReaction, { suffix: " ms", immediate });
     }
 
     function updateTime() {
@@ -926,7 +1052,7 @@
       roundState.textContent = "Ready";
       statusLine.textContent = "Press Start to begin a 30-second round.";
       timeValue.textContent = "30.0s";
-      updateStats();
+      updateStats(true);
     }
 
     function startGame() {

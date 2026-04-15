@@ -79,6 +79,12 @@ enum StartButtonBlinkMode {
 StartButtonBlinkMode startButtonBlinkMode = START_BLINK_OFF;
 unsigned long lastStartButtonBlinkAt = 0;
 
+// -- Ready LED chase animation (TL > TR > BR > BL loop) --
+byte  readyAnimStep = 0;          // 0=TL, 1=TR, 2=BR, 3=BL
+unsigned long lastReadyAnimAt = 0;
+const unsigned long READY_ANIM_INTERVAL = 150; // ms per step
+const byte READY_ANIM_PINS[4] = { LED_TOP_LEFT, LED_TOP_RIGHT, LED_BOTTOM_RIGHT, LED_BOTTOM_LEFT };
+
 unsigned long startTime   = 0;
 unsigned long elapsedTime = 0;
 
@@ -201,27 +207,53 @@ void setStartButtonBlinkMode(StartButtonBlinkMode mode) {
 
 void updateStartButtonBlink() {
   unsigned long now = millis();
-  unsigned long blinkInterval = 0;
 
   if (startButtonBlinkMode == START_BLINK_READY) {
-    blinkInterval = 450;
+    // Steady ON -- corner LED chase handles the animation
+    if (!startButtonLedState) {
+      startButtonLedState = true;
+      digitalWrite(START_BUTTON_LED, HIGH);
+    }
   } else if (startButtonBlinkMode == START_BLINK_POWER_READY) {
-    blinkInterval = 180;
+    // Fast blink for super-power ready
+    const unsigned long blinkInterval = 180;
+    if (now - lastStartButtonBlinkAt >= blinkInterval) {
+      lastStartButtonBlinkAt = now;
+      startButtonLedState = !startButtonLedState;
+      digitalWrite(START_BUTTON_LED, startButtonLedState ? HIGH : LOW);
+    }
   } else {
+    // OFF
     if (startButtonLedState) {
       startButtonLedState = false;
       digitalWrite(START_BUTTON_LED, LOW);
     }
+  }
+}
+
+// Non-blocking clockwise chase: TL -> TR -> BR -> BL -> repeat
+void updateReadyAnimation() {
+  if (isGameRunning || startButtonBlinkMode != START_BLINK_READY) {
+    if (!isGameRunning) {
+      for (byte i = 0; i < 4; i++) {
+        digitalWrite(READY_ANIM_PINS[i], LOW);
+      }
+    }
     return;
   }
 
-  if (now - lastStartButtonBlinkAt < blinkInterval) {
+  unsigned long now = millis();
+  if (now - lastReadyAnimAt < READY_ANIM_INTERVAL) {
     return;
   }
+  lastReadyAnimAt = now;
 
-  lastStartButtonBlinkAt = now;
-  startButtonLedState = !startButtonLedState;
-  digitalWrite(START_BUTTON_LED, startButtonLedState ? HIGH : LOW);
+  for (byte i = 0; i < 4; i++) {
+    digitalWrite(READY_ANIM_PINS[i], LOW);
+  }
+  digitalWrite(READY_ANIM_PINS[readyAnimStep], HIGH);
+
+  readyAnimStep = (readyAnimStep + 1) % 4;
 }
 
 // ── Sound functions ──
@@ -625,6 +657,7 @@ void checkButtons() {
 // ================= LOOP =================
 void loop() {
   updateStartButtonBlink();
+  updateReadyAnimation();
 
   if (digitalRead(START_BUTTON) == LOW) {
     delay(50); // debounce

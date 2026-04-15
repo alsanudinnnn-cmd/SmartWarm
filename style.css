@@ -72,6 +72,94 @@ body::after {
   background-size: cover;
 }
 
+.site-shell {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition:
+    opacity 420ms ease,
+    transform 520ms cubic-bezier(.22, .92, .2, 1),
+    filter 520ms cubic-bezier(.22, .92, .2, 1);
+}
+
+body.motion-enhanced .site-shell {
+  opacity: 0;
+  transform: translateY(18px) scale(0.985);
+  filter: blur(6px);
+}
+
+body.motion-enhanced.is-page-ready .site-shell {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+body.motion-enhanced.is-page-exiting .site-shell {
+  opacity: 0;
+  transform: translateY(14px) scale(0.985);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+body.motion-enhanced .reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(28px) scale(0.985);
+  transition:
+    opacity 620ms cubic-bezier(.22, .92, .2, 1),
+    transform 720ms cubic-bezier(.22, .92, .2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+body.motion-enhanced .reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.hero-metrics article,
+.flow-list article,
+.feature-strip article,
+.results-meta span {
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease;
+  will-change: transform;
+}
+
+.hero-metrics article:hover,
+.flow-list article:hover,
+.feature-strip article:hover,
+.results-meta span:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 30px rgba(10, 2, 24, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-shell,
+  body.motion-enhanced .site-shell,
+  body.motion-enhanced .reveal-on-scroll,
+  .hero-metrics article,
+  .flow-list article,
+  .feature-strip article,
+  .results-meta span {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .site-shell,
+  body.motion-enhanced .site-shell {
+    opacity: 1 !important;
+  }
+
+  body.motion-enhanced .reveal-on-scroll {
+    opacity: 1 !important;
+  }
+}
+
 .hit-flash {
   position: fixed;
   inset: 0;
@@ -1076,6 +1164,41 @@ tbody td {
   padding: 36px;
   margin-bottom: 24px;
   border-radius: var(--radius-xl);
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-wrapper img,
+.avatar-wrapper span {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🔥 FIRE BADGE */
+.streak-fire {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+
+  background: linear-gradient(135deg, #ff512f, #ff9800);
+  color: white;
+
+  font-size: 10px;
+  font-weight: bold;
+
+  padding: 4px 6px;
+  border-radius: 10px;
+
+  box-shadow: 0 0 10px rgba(255, 100, 0, 0.8);
 }
 
 .page-led .site-shell {
@@ -2396,6 +2519,8 @@ body.page-led.on-fire .ambient-particle {
   .page-results .table-wrap table {
     min-width: 920px;
   }
+
+  
 }
 
 @keyframes timer-face-slice {

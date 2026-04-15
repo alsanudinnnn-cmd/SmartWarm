@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -689,6 +689,12 @@
   <audio id="powerCardSound" preload="auto">
     <source src="soundeffect/PowerCard.mp3" type="audio/mpeg">
   </audio>
+  <audio id="readyGoSound" preload="auto">
+    <source src="soundeffect/Ready%20GO.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="btnPressedSound" preload="auto">
+    <source src="soundeffect/Button%20Pressed%20SFX.mp3" type="audio/mpeg">
+  </audio>
   <div id="hitFlash" class="hit-flash" aria-hidden="true"></div>
   <div id="impactRings" class="impact-rings" aria-hidden="true">
     <span class="impact-ring impact-ring-1"></span>
@@ -918,6 +924,8 @@
     const levelUpSound = document.getElementById("levelUpSound");
     const streakSound = document.getElementById("streakSound");
     const powerCardSound = document.getElementById("powerCardSound");
+    const readyGoSound = document.getElementById("readyGoSound");
+    const btnPressedSound = document.getElementById("btnPressedSound");
 
     // New elements
     const liveScoreValue     = document.getElementById("liveScoreValue");
@@ -1002,7 +1010,7 @@
       }
 
       audioPrimed = true;
-      [gameStartSound, gameWinSound, gameLoseSound, levelUpSound, streakSound, powerCardSound].forEach((audio) => {
+      [gameStartSound, gameWinSound, gameLoseSound, levelUpSound, streakSound, powerCardSound, readyGoSound, btnPressedSound].forEach((audio) => {
         if (!audio) {
           return;
         }
@@ -1687,6 +1695,7 @@
           setHeroTargetLabel(`${ledNames[ledIndex]} is active`);
           spawnTargetBurst(ledIndex, Math.max(1, Math.min(4, lastStreakValue + 1)));
           if (lastLedIndex !== -1 && lastLedIndex !== ledIndex) {
+            playGameSound(btnPressedSound, "Button pressed");
             triggerHitFlash();
             spawnComboParticles(Math.max(lastStreakValue, 1));
           }
@@ -1889,6 +1898,7 @@
         const evt = Number(snapshot.val() ?? 0);
         if (!evt || evt === lastCountdownEvent) return;
         lastCountdownEvent = evt;
+        playGameSound(readyGoSound, "Ready GO");
         showCountdown();
       }, handleError);
     }

@@ -13,10 +13,10 @@ const smartWarmApp = firebase.apps.length
   ? firebase.app()
   : firebase.initializeApp(smartWarmFirebaseConfig);
 
-// ✅ GUNA AUTH VARIABLE
+// AUTH VARIABLE
 const auth = firebase.auth();
 
-// ✅ TAMBAH INI (SESSION ONLY)
+// (SESSION ONLY)
 auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
   .then(() => {
     console.log("Session persistence ON");
